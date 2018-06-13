@@ -13,7 +13,7 @@ function genSignature(form) {
     queryString = queryString.join('');
 
     console.log(queryString);
-    let signatureResult = CryptoJS.SHA256(queryString + "secretkey").toString(CryptoJS.enc.Hex);
+    let signatureResult = CryptoJS.SHA256(queryString + process.env.BX_SECRET).toString(CryptoJS.enc.Hex);
     form.signature = signatureResult;
 }
 
@@ -50,7 +50,7 @@ let obj = {
 
     newOrder: function (req, res, next) {
         let form = {
-            key: req.body.key,
+            key: process.env.BX_APIKEY,
             nonce: req.body.timestamp + '000',
             signature: '',
             pairing: symbol.carboneum[req.body.symbol].bx,
@@ -111,7 +111,7 @@ let obj = {
     },
     allOrder: function (req, res, next) {
         let form = {
-            key: req.body.key,
+            key: process.env.BX_APIKEY,
             nonce: req.query.timestamp + '000',
             pairing: symbol.carboneum[req.query.symbol].bx
         };
@@ -168,7 +168,7 @@ let obj = {
     },
     deleteOrder: function (req, res, next) {
         let form = {
-            key: req.body.key,
+            key: process.env.BX_APIKEY,
             nonce: req.query.timestamp + '000',
             pairing: symbol.carboneum[req.query.symbol].bx,
             order_id: req.query.orderId
@@ -210,7 +210,7 @@ let obj = {
     },
     account: function (req, res, next) {
         let form = {
-            key: req.body.key,
+            key: process.env.BX_APIKEY,
             nonce: req.query.timestamp + '000'
         };
 
