@@ -1,8 +1,6 @@
 const request = require('supertest');
 const app = require('../app');
 
-const binance = require('./binance');
-
 test('binance depth', function (done) {
   request(app)
     .get('/depth/')
