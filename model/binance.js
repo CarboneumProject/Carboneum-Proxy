@@ -23,7 +23,7 @@ function genSignature(form) {
     queryString = queryString.join('&');
 
     console.log(queryString);
-    let signatureResult = CryptoJS.HmacSHA256(queryString, "secretkey").toString(CryptoJS.enc.Hex);
+    let signatureResult = CryptoJS.HmacSHA256(queryString, process.env.BI_SECRETE).toString(CryptoJS.enc.Hex);
     form.signature = signatureResult;
 }
 
@@ -113,7 +113,7 @@ let obj = {
                 {
                     'Cache-Control': 'no-cache',
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-MBX-APIKEY': 'api-key'
+                    'X-MBX-APIKEY': process.env.BI_APIKEY
                 },
             form: form,
             json:true
@@ -172,7 +172,7 @@ let obj = {
             headers:
                 {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-MBX-APIKEY': 'api-key'
+                    'X-MBX-APIKEY': process.env.BI_APIKEY
                 },
             qs: qs,
             json:true
@@ -220,7 +220,7 @@ let obj = {
             headers:
                 {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-MBX-APIKEY': 'api-key'
+                    'X-MBX-APIKEY': process.env.BI_APIKEY
                 },
             qs: qs,
             json:true
@@ -258,7 +258,7 @@ let obj = {
             headers:
                 {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-MBX-APIKEY': 'api-key'
+                    'X-MBX-APIKEY': process.env.BI_APIKEY
                 },
             qs: qs,
             json:true
