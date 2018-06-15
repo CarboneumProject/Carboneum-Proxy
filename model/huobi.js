@@ -106,7 +106,7 @@ let obj = {
             Signature: req.query.Signature,
             SignatureMethod: req.query.SignatureMethod,
             SignatureVersion: '2',
-            AccessKeyId: req.query.AccessKeyId
+            AccessKeyId: process.env.HUOBI_API_KEY
         }, encodeURIComponent(nonce));
 
         let form = {
@@ -189,7 +189,7 @@ let obj = {
             states: req.query.states,
             SignatureMethod: req.query.SignatureMethod,
             SignatureVersion: '2',
-            AccessKeyId: req.query.AccessKeyId,
+            AccessKeyId: process.env.HUOBI_API_KEY,
         }, encodeURIComponent(nonce));
 
         let toHuobi = [];
@@ -263,7 +263,7 @@ let obj = {
             Signature: req.query.Signature,
             SignatureMethod: req.query.SignatureMethod,
             SignatureVersion: '2',
-            AccessKeyId: req.query.AccessKeyId,
+            AccessKeyId: process.env.HUOBI_API_KEY,
         }, encodeURIComponent(nonce));
 
 
@@ -314,7 +314,7 @@ let obj = {
             Signature: req.query.Signature,
             SignatureMethod: req.query.SignatureMethod,
             SignatureVersion: '2',
-            AccessKeyId: req.query.AccessKeyId,
+            AccessKeyId: process.env.HUOBI_API_KEY,
         }, encodeURIComponent(nonce));
 
         console.log(signature);

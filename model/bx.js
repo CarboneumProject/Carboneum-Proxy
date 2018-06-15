@@ -44,7 +44,7 @@ let obj = {
 
     newOrder: function (req, res, next) {
         let form = {
-            key: req.body.key,
+            key: process.env.BX_API_KEY,
             nonce: req.body.timestamp + '000',
             signature: '',
             pairing: symbol.carboneum[req.query.symbol].bx,
@@ -105,7 +105,7 @@ let obj = {
     },
     allOrder: function (req, res, next) {
         let form = {
-            key: req.body.key,
+            key: process.env.BX_API_KEY,
             nonce: req.query.timestamp + '000',
             pairing: symbol.carboneum[req.query.symbol].bx
         };
@@ -162,7 +162,7 @@ let obj = {
     },
     deleteOrder: function (req, res, next) {
         let form = {
-            key: req.body.key,
+            key: process.env.BX_API_KEY,
             nonce: req.query.timestamp + '000',
             pairing: symbol.carboneum[req.query.symbol].bx,
             order_id: req.body.orderId
@@ -204,7 +204,7 @@ let obj = {
     },
     account: function (req, res, next) {
         let form = {
-            key: req.body.key,
+            key: process.env.BX_API_KEY,
             nonce: req.query.timestamp + '000'
         };
 
