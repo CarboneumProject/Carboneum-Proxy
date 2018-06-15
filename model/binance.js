@@ -23,7 +23,7 @@ function genSignature(form) {
     queryString = queryString.join('&');
 
     console.log(queryString);
-    let signatureResult = CryptoJS.HmacSHA256(queryString, process.env.BI_SECRETE).toString(CryptoJS.enc.Hex);
+    let signatureResult = CryptoJS.HmacSHA256(queryString, process.env.BN_SECRET_KEY).toString(CryptoJS.enc.Hex);
     form.signature = signatureResult;
 }
 
@@ -87,7 +87,7 @@ let obj = {
 
     newOrder: function (req, res, next) {
         let form = {
-            symbol: symbol.carboneum[req.body.symbol].binance,
+            symbol: symbol.carboneum[req.query.symbol].binance,
             side: req.body.side,
             type: req.body.type,
             timeInForce: req.body.timeInForce,
@@ -113,7 +113,7 @@ let obj = {
                 {
                     'Cache-Control': 'no-cache',
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-MBX-APIKEY': process.env.BI_APIKEY
+                    'X-MBX-APIKEY': process.env.BN_API_KEY
                 },
             form: form,
             json:true
@@ -172,7 +172,7 @@ let obj = {
             headers:
                 {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-MBX-APIKEY': process.env.BI_APIKEY
+                    'X-MBX-APIKEY': process.env.BN_API_KEY
                 },
             qs: qs,
             json:true
@@ -209,7 +209,7 @@ let obj = {
 
         let qs = {
             symbol: symbolName,
-            orderId: req.query.orderId,
+            orderId: req.body.orderId,
             timestamp: req.query.timestamp + '000'
         };
 
@@ -220,7 +220,7 @@ let obj = {
             headers:
                 {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-MBX-APIKEY': process.env.BI_APIKEY
+                    'X-MBX-APIKEY': process.env.BN_API_KEY
                 },
             qs: qs,
             json:true
@@ -258,7 +258,7 @@ let obj = {
             headers:
                 {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-MBX-APIKEY': process.env.BI_APIKEY
+                    'X-MBX-APIKEY': process.env.BN_API_KEY
                 },
             qs: qs,
             json:true

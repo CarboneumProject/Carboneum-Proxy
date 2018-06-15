@@ -5,7 +5,6 @@ var bx = require('../model/bx');
 
 var ExchangeError = require("../model/exchangeerror");
 
-
 module.exports = function (exchange) {
     /* GET home page. */
 

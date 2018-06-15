@@ -4,8 +4,6 @@ var CryptoJS = require("crypto-js");
 var symbol = require("./symbol");
 var ExchangeError = require("./exchangeerror");
 
-let nonce = Date.now();
-
 function genSignature(form) {
     let queryString = [];
 
@@ -13,18 +11,14 @@ function genSignature(form) {
     queryString = queryString.join('');
 
     console.log(queryString);
-    let signatureResult = CryptoJS.SHA256(queryString + process.env.BX_SECRET).toString(CryptoJS.enc.Hex);
+    let signatureResult = CryptoJS.SHA256(queryString + process.env.BX_SECRET_KEY).toString(CryptoJS.enc.Hex);
     form.signature = signatureResult;
 }
 
 let obj = {
-    depth: function (req, res, next) {
+    depth: function (req, res) {
 
-        // try {
-        //     var symbolName = symbol.carboneum[req.query.symbol].bx;
-        // } catch (e) {
-        //     symbolName = req.query.symbol;
-        // }
+        let nonce = new Date().getTime();
         var options = {
             method: 'GET',
             url: 'https://bx.in.th/api/orderbook/',
@@ -50,10 +44,10 @@ let obj = {
 
     newOrder: function (req, res, next) {
         let form = {
-            key: process.env.BX_APIKEY,
+            key: req.body.key,
             nonce: req.body.timestamp + '000',
             signature: '',
-            pairing: symbol.carboneum[req.body.symbol].bx,
+            pairing: symbol.carboneum[req.query.symbol].bx,
             type: req.body.side,
             amount: req.body.quantity,
             rate: req.body.price
@@ -94,8 +88,8 @@ let obj = {
             }
 
             res.send({
-                "symbol": req.body.symbol,
-                "orderId": '',
+                "symbol": req.query.symbol,
+                "orderId": body.order_id,
                 "clientOrderId": '',
                 "transactTime": req.body.timestamp,
                 "price": req.body.price,
@@ -111,7 +105,7 @@ let obj = {
     },
     allOrder: function (req, res, next) {
         let form = {
-            key: process.env.BX_APIKEY,
+            key: req.body.key,
             nonce: req.query.timestamp + '000',
             pairing: symbol.carboneum[req.query.symbol].bx
         };
@@ -168,10 +162,10 @@ let obj = {
     },
     deleteOrder: function (req, res, next) {
         let form = {
-            key: process.env.BX_APIKEY,
+            key: req.body.key,
             nonce: req.query.timestamp + '000',
             pairing: symbol.carboneum[req.query.symbol].bx,
-            order_id: req.query.orderId
+            order_id: req.body.orderId
         };
 
         genSignature(form);
@@ -202,7 +196,7 @@ let obj = {
             res.send({
                 "symbol": req.query.symbol,
                 "origClientOrderId": '',
-                "orderId": req.query.orderId,
+                "orderId": req.body.orderId,
                 "clientOrderId": ''
             });
         });
@@ -210,7 +204,7 @@ let obj = {
     },
     account: function (req, res, next) {
         let form = {
-            key: process.env.BX_APIKEY,
+            key: req.body.key,
             nonce: req.query.timestamp + '000'
         };
 
@@ -241,8 +235,10 @@ let obj = {
         request(options, function (error, response, body) {
             if (error) throw new Error(error);
 
-            if(body.error !== null) {
-                if (body.error.substring(0, 32) === 'Order not found') {
+            console.log(body);
+
+            if(body.error === false) {
+                if (body.error.substring(0, 15) === 'Order not found') {
                     return next(new ExchangeError('Mandatory parameter was not sent, was empty/null, or malformed.', 1102));
                 } else {
                     return next(new ExchangeError('An unknown error occured while processing the request.', 1000));
