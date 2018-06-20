@@ -13,4 +13,6 @@ const exchange = {
     }
 };
 
+console.log('exchange model created');
+
 module.exports = exchange;
