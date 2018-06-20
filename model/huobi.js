@@ -53,7 +53,7 @@ let obj = {
             url: 'https://api.huobi.pro/market/depth',
             qs: {
                 symbol: symbolName,
-                type: req.query.type
+                type: 'percent10'
             },
             json: true
         };
@@ -72,8 +72,8 @@ let obj = {
             for (let i in body.tick.bids) {
                 if (body.tick.bids.hasOwnProperty(i)) {
                     depth.bids.push([
-                        body.tick.bids[i][0],
-                        body.tick.bids[i][1]
+                        body.tick.bids[i][0].toString(),
+                        body.tick.bids[i][1].toString()
                     ]);
                 }
             }
@@ -81,8 +81,8 @@ let obj = {
             for (let i in body.tick.asks) {
                 if (body.tick.asks.hasOwnProperty(i)) {
                     depth.asks.push([
-                        body.tick.asks[i][0],
-                        body.tick.asks[i][1]
+                        body.tick.asks[i][0].toString(),
+                        body.tick.asks[i][1].toString()
                     ]);
                 }
             }
@@ -93,26 +93,36 @@ let obj = {
     },
 
     newOrder: function (req, res, next) {
+
         let nonce = moment().toISOString().substring(0, 19);
 
+        console.log(req.body.side);
+
+        if (req.body.side === 'sell' || req.body.side === 'SELL') {
+            req.body.side = 'sell-limit'
+        } else {
+            req.body.side = 'buy-limit'
+        }
+        console.log(req.body.side);
+
         try {
-            var symbolName = symbol.carboneum[req.query.symbol].huobi;
+            var symbolName = symbol.carboneum[req.body.symbol].huobi;
         } catch (e) {
-            symbolName = req.query.symbol;
+            symbolName = req.body.symbol;
         }
 
         const signature = genSignature('POST', 'api.huobi.pro', '/v1/order/orders/place', {
             symbol: symbolName,
             Signature: req.query.Signature,
-            SignatureMethod: req.query.SignatureMethod,
+            SignatureMethod: 'HmacSHA256',
             SignatureVersion: '2',
-            AccessKeyId: process.env.HUOBI_API_KEY
+            AccessKeyId: process.env.HUOBI_API_KEY,
         }, encodeURIComponent(nonce));
 
         let form = {
-            AccessKeyId: req.query.AccessKeyId,
+            AccessKeyId: process.env.HUOBI_API_KEY,
             Signature: signature,
-            SignatureMethod: req.query.SignatureMethod,
+            SignatureMethod: 'HmacSHA256',
             Timestamp: nonce,
             symbol: symbolName,
             SignatureVersion: '2'
@@ -133,6 +143,8 @@ let obj = {
                 },
             json: true
         };
+
+
         request(options, function (error, response, body) {
             if (error) throw new Error(error);
 
@@ -148,27 +160,28 @@ let obj = {
                 }
             }
 
-            req.body.side = req.body.side.toUpperCase();
-
-            if (req.body.side === "SELL-LIMIT") {
+            console.log(req.body.side);
+            if (req.body.side === 'sell-limit') {
                 req.body.side = req.body.side.substring(0, 4)
             } else {
                 req.body.side = req.body.side.substring(0, 3)
             }
 
-            console.log(body);
+            console.log(req.body.side);
+
+
             res.send({
-                "symbol": req.query.symbol,
-                "orderId": body.data,
-                "clientOrderId": '',
+                "symbol": req.body.symbol,
+                "orderId": body.data.toString(),
+                "clientOrderId": null,
                 "transactTime": Date.parse(nonce) / 1000,
                 "price": req.body.price,
                 "origQty": req.body.quantity,
-                "executeQty": '',
-                "status": '',
-                "timeInForce": '',
-                "type": '',
-                "side": req.body.side
+                "executedQty": null,
+                "status": null,
+                "timeInForce": null,
+                "type": null,
+                "side": req.body.side.toUpperCase()
             });
         });
 
@@ -186,8 +199,8 @@ let obj = {
         const signature = genSignature('GET', 'api.huobi.pro', '/v1/order/orders', {
             symbol: symbolName,
             Signature: req.query.Signature,
-            states: req.query.states,
-            SignatureMethod: req.query.SignatureMethod,
+            states: 'submitted',
+            SignatureMethod: 'HmacSHA256',
             SignatureVersion: '2',
             AccessKeyId: process.env.HUOBI_API_KEY,
         }, encodeURIComponent(nonce));
@@ -197,13 +210,13 @@ let obj = {
         console.log(signature);
 
         let form = {
-            AccessKeyId: req.query.AccessKeyId,
+            AccessKeyId: process.env.HUOBI_API_KEY,
             Signature: signature,
-            SignatureMethod: req.query.SignatureMethod,
+            SignatureMethod: 'HmacSHA256',
             Timestamp: nonce,
             symbol: symbolName,
             SignatureVersion: '2',
-            states: req.query.states,
+            states: 'submitted',
         };
         var options = {
             method: 'GET',
@@ -233,19 +246,19 @@ let obj = {
                 }
                 toHuobi.push({
                     "symbol": body.data[i].symbol,
-                    "orderId": body.data[i].id,
-                    "clientOrderId": '',
+                    "orderId": body.data[i].id.toString(),
+                    "clientOrderId": null,
                     "price": body.data[i].price,
                     "origQty": body.data[i].amount,
-                    "executedQty": '',
-                    "status": '',
-                    "timeInForce": '',
-                    "type": '',
+                    "executedQty": null,
+                    "status": null,
+                    "timeInForce": null,
+                    "type": null,
                     "side": body.data[i].type,
-                    "stopPrice": '',
-                    "icebergQty": '',
+                    "stopPrice": null,
+                    "icebergQty": null,
                     "time": body.data[i]['created-at'],
-                    "isWorking": ''
+                    "isWorking": null
                 });
             }
 
@@ -259,9 +272,12 @@ let obj = {
 
         let nonce = moment().toISOString().substring(0, 19);
 
-        const signature = genSignature('POST', 'api.huobi.pro', `/v1/order/orders/${process.env.HUOBI_ORDER_ID}/submitcancel`, {
+        console.log(req);
+        let orderId = req.query.orderId;
+
+        const signature = genSignature('POST', 'api.huobi.pro', `/v1/order/orders/${orderId}/submitcancel`, {
             Signature: req.query.Signature,
-            SignatureMethod: req.query.SignatureMethod,
+            SignatureMethod: 'HmacSHA256',
             SignatureVersion: '2',
             AccessKeyId: process.env.HUOBI_API_KEY,
         }, encodeURIComponent(nonce));
@@ -270,16 +286,16 @@ let obj = {
         console.log(signature);
 
         let form = {
-            AccessKeyId: req.query.AccessKeyId,
+            AccessKeyId: process.env.HUOBI_API_KEY,
             Signature: signature,
-            SignatureMethod: req.query.SignatureMethod,
+            SignatureMethod: 'HmacSHA256',
             Timestamp: nonce,
             SignatureVersion: '2',
         };
 
         var options = {
             method: 'POST',
-            url: `https://api.huobi.pro/v1/order/orders/${process.env.HUOBI_ORDER_ID}/submitcancel`,
+            url: `https://api.huobi.pro/v1/order/orders/${orderId}/submitcancel`,
             form: form,
             json: true
         };
@@ -289,6 +305,8 @@ let obj = {
             if (body.status === 'error') {
                 if (body['err-code'].substring(0, 24) === 'order-orderstate-error') {
                     return next(new ExchangeError('The order state is error.', 9500));
+                } else if (body['err-code'].substring(0, 23) === 'api-signature-not-valid') {
+                    return next(new ExchangeError('Signature for this request is not valid.', 1022));
                 } else {
                     return next(new ExchangeError('An unknown error occured while processing the request.', 1000));
                 }
@@ -296,10 +314,10 @@ let obj = {
 
             console.log(body);
             res.send({
-                "symbol": '',
-                "origClientOrderId": '',
-                "orderId": body.data,
-                "clientOrderId": ''
+                "symbol": null,
+                "origClientOrderId": null,
+                "orderId": toString(body.data),
+                "clientOrderId": null
             });
         });
 
@@ -312,7 +330,7 @@ let obj = {
 
         const signature = genSignature('GET', 'api.huobi.pro', `/v1/account/accounts/${process.env.HUOBI_ACC}/balance`, {
             Signature: req.query.Signature,
-            SignatureMethod: req.query.SignatureMethod,
+            SignatureMethod: 'HmacSHA256',
             SignatureVersion: '2',
             AccessKeyId: process.env.HUOBI_API_KEY,
         }, encodeURIComponent(nonce));
@@ -320,23 +338,24 @@ let obj = {
         console.log(signature);
 
         let form = {
-            AccessKeyId: req.query.AccessKeyId,
+            AccessKeyId: process.env.HUOBI_API_KEY,
             Signature: signature,
-            SignatureMethod: req.query.SignatureMethod,
+            SignatureMethod: 'HmacSHA256',
             Timestamp: nonce,
             SignatureVersion: '2'
         };
         let accHb = {
-            "makerCommission": '',
-            "takerCommission": '',
-            "buyerCommission": '',
-            "sellerCommission": '',
-            "canTrade": '',
-            "canWithdraw": '',
-            "canDeposit": '',
+            "makerCommission": null,
+            "takerCommission": null,
+            "buyerCommission": null,
+            "sellerCommission": null,
+            "canTrade": null,
+            "canWithdraw": null,
+            "canDeposit": null,
             "updateTime": Date.parse(nonce) / 1000,
             "balances": []
         };
+        console.log(accHb);
 
         var options = {
             method: 'GET',
@@ -344,8 +363,13 @@ let obj = {
             qs: form,
             json: true
         };
+
+        console.log(options);
+
         request(options, function (error, response, body) {
             if (error) throw new Error(error);
+
+            console.log(body);
 
             if (body.status === 'error') {
                 if (body['err-code'].substring(0, 23) === 'api-signature-not-valid') {

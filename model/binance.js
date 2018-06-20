@@ -86,8 +86,14 @@ let obj = {
     },
 
     newOrder: function (req, res, next) {
+
+        try {
+            var symbolName = symbol.carboneum[req.body.symbol].binance;
+        } catch (e) {
+            symbolName = req.body.symbol;
+        }
         let form = {
-            symbol: symbol.carboneum[req.query.symbol].binance,
+            symbol: symbolName,
             side: req.body.side,
             type: req.body.type,
             timeInForce: req.body.timeInForce,
@@ -147,7 +153,20 @@ let obj = {
                     return next(new ExchangeError('An unknown error occured while processing the request.', 1000));
                 }
             }
-            res.send(body);
+            console.log(body);
+            res.send({
+                "symbol": body.symbol,
+                "orderId": body.orderId.toString(),
+                "clientOrderId": body.clientOrderId,
+                "transactTime": body.transactTime,
+                "price": body.price,
+                "origQty": body.origQty,
+                "executedQty":body.executedQty,
+                "status": body.status,
+                "timeInForce": body.timeInForce,
+                "type": body.type,
+                "side": body.side
+            });
         });
 
     },
@@ -159,6 +178,8 @@ let obj = {
         } catch (e) {
             symbolName = req.query.symbol;
         }
+
+        let arrBinance = [];
 
         let qs = {
             symbol: symbolName,
@@ -195,8 +216,27 @@ let obj = {
                     return next(new ExchangeError('An unknown error occured while processing the request.', 1000));
                 }
             }
+            for (let i in body) {
+                arrBinance.push({
+                    "symbol": body[i].symbol,
+                    "orderId": body[i].orderId.toString(),
+                    "clientOrderId": body[i].clientOrderId,
+                    "price": body[i].price,
+                    "origQty": body[i].origQty,
+                    "executedQty": body[i].executedQty,
+                    "status": body[i].status,
+                    "timeInForce": body[i].timeInForce,
+                    "type": body[i].type,
+                    "side": body[i].side,
+                    "stopPrice": body[i].stopPrice,
+                    "icebergQty": body[i].icebergQty,
+                    "time": body[i].time,
+                    "isWorking": body[i].isWorking
+                });
+            }
+
             console.log(body);
-            res.send(body);
+            res.send(arrBinance);
         });
 
     },
@@ -209,7 +249,7 @@ let obj = {
 
         let qs = {
             symbol: symbolName,
-            orderId: req.body.orderId,
+            orderId: req.query.orderId,
             timestamp: req.query.timestamp + '000'
         };
 
@@ -225,6 +265,7 @@ let obj = {
             qs: qs,
             json:true
         };
+        console.log(options);
         request(options, function (error, response, body) {
             if (error) throw new Error(error);
 
@@ -241,7 +282,12 @@ let obj = {
             }
 
             console.log(body);
-            res.send(body);
+            res.send({
+                "symbol": body.symbol,
+                "origClientOrderId": body.origClientOrderId,
+                "orderId": toString(body.orderId),
+                "clientOrderId": body.clientOrderId
+            });
         });
 
     },

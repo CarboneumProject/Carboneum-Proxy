@@ -91,7 +91,7 @@ test('binance allOrders', function (done) {
         expect(allOrders[i].symbol).toBe(symbol);
 
         expect(allOrders[i]).toHaveProperty('orderId');
-        expect(typeof allOrders[i].orderId).toBe('number');
+        expect(typeof allOrders[i].orderId).toBe('string');
 
         expect(allOrders[i]).toHaveProperty('clientOrderId');
         expect(typeof allOrders[i].clientOrderId).toBe('string');
@@ -200,7 +200,7 @@ test('binance create and cancel order', async function (done) {
   expect(sellResponse.body.side).toBe(side);
 
   expect(sellResponse.body).toHaveProperty('orderId');
-  expect(typeof sellResponse.body.orderId).toBe('number');
+  expect(typeof sellResponse.body.orderId).toBe('string');
 
   expect(sellResponse.body).toHaveProperty('transactTime');
   expect(typeof sellResponse.body.transactTime).toBe('number');
@@ -228,7 +228,7 @@ test('binance create and cancel order', async function (done) {
   expect(typeof cancelResponse.body.clientOrderId).toBe('string');
 
   expect(cancelResponse.body).toHaveProperty('orderId');
-  expect(typeof cancelResponse.body.orderId).toBe('number');
+  expect(typeof cancelResponse.body.orderId).toBe('string');
 
   done();
 });

@@ -45,10 +45,10 @@ let obj = {
     newOrder: function (req, res, next) {
         let form = {
             key: process.env.BX_API_KEY,
-            nonce: req.body.timestamp + '000',
+            nonce: req.body.timestamp + '00000000000',
             signature: '',
-            pairing: symbol.carboneum[req.query.symbol].bx,
-            type: req.body.side,
+            pairing: symbol.carboneum[req.body.symbol].bx,
+            type: req.body.side.toLowerCase(),
             amount: req.body.quantity,
             rate: req.body.price
         };
@@ -65,6 +65,7 @@ let obj = {
             form: form,
             json:true
         };
+        console.log(options);
 
         request(options, function (error, response, body) {
             if (error) throw new Error(error);
@@ -86,18 +87,18 @@ let obj = {
                     return next(new ExchangeError('An unknown error occured while processing the request.', 1000));
                 }
             }
-
+            console.log(body);
             res.send({
-                "symbol": req.query.symbol,
-                "orderId": body.order_id,
-                "clientOrderId": '',
+                "symbol": req.body.symbol,
+                "orderId": body.order_id.toString(),
+                "clientOrderId": null,
                 "transactTime": req.body.timestamp,
                 "price": req.body.price,
                 "origQty": req.body.quantity,
-                "executeQty": '',
-                "status": '',
-                "timeInForce": '',
-                "type": '',
+                "executedQty": null,
+                "status": null,
+                "timeInForce": null,
+                "type": null,
                 "side": req.body.side.toUpperCase()
             });
         });
@@ -106,7 +107,7 @@ let obj = {
     allOrder: function (req, res, next) {
         let form = {
             key: process.env.BX_API_KEY,
-            nonce: req.query.timestamp + '000',
+            nonce: req.query.timestamp + '00000000000',
             pairing: symbol.carboneum[req.query.symbol].bx
         };
 
@@ -123,6 +124,7 @@ let obj = {
             form: form,
             json:true
         };
+        console.log(options);
         request(options, function (error, response, body) {
             if (error) throw new Error(error);
 
@@ -138,21 +140,23 @@ let obj = {
             }
 
             for (let i in body.orders) {
+                body.orders[i].pairing_id = symbol.bx[body.orders[i].pairing_id];
+
                 toBinance.push({
-                    "symbol": req.query.symbol,
-                    "orderId": body.orders[i].order_id,
-                    "clientOrderId": '',
-                    "price": body.orders[i].rate,
-                    "origQty": body.orders[i].amount,
-                    "executedQty": '',
-                    "status": '',
-                    "timeInForce": '',
-                    "type": '',
+                    "symbol": body.orders[i].pairing_id,
+                    "orderId": body.orders[i].order_id.toString(),
+                    "clientOrderId": null,
+                    "price": body.orders[i].rate.toString(),
+                    "origQty": body.orders[i].amount.toString(),
+                    "executedQty": null,
+                    "status": null,
+                    "timeInForce": null,
+                    "type": null,
                     "side": body.orders[i].order_type.toUpperCase(),
-                    "stopPrice": '',
-                    "icebergQty": '',
+                    "stopPrice": null,
+                    "icebergQty": null,
                     "time": Date.parse(body.orders[i].date)/1000,
-                    "isWorking": ''
+                    "isWorking": null
                 });
             }
             console.log(toBinance);
@@ -163,9 +167,9 @@ let obj = {
     deleteOrder: function (req, res, next) {
         let form = {
             key: process.env.BX_API_KEY,
-            nonce: req.query.timestamp + '000',
+            nonce: req.query.timestamp + '00000000000',
             pairing: symbol.carboneum[req.query.symbol].bx,
-            order_id: req.body.orderId
+            order_id: req.query.orderId
         };
 
         genSignature(form);
@@ -179,6 +183,7 @@ let obj = {
             form: form,
             json:true
         };
+        console.log(options);
         request(options, function (error, response, body) {
             if (error) throw new Error(error);
 
@@ -195,9 +200,9 @@ let obj = {
             console.log(body);
             res.send({
                 "symbol": req.query.symbol,
-                "origClientOrderId": '',
-                "orderId": req.body.orderId,
-                "clientOrderId": ''
+                "origClientOrderId": null,
+                "orderId": req.query.orderId,
+                "clientOrderId": null
             });
         });
 
@@ -209,14 +214,14 @@ let obj = {
         };
 
         let accBx = {
-            "makerCommission": '',
-            "takerCommission": '',
-            "buyerCommission": '',
-            "sellerCommission": '',
-            "canTrade": '',
-            "canWithdraw": '',
-            "canDeposit": '',
-            "updateTime": req.query.timestamp,
+            "makerCommission": null,
+            "takerCommission": null,
+            "buyerCommission": null,
+            "sellerCommission": null,
+            "canTrade": null,
+            "canWithdraw": null,
+            "canDeposit": null,
+            "updateTime": parseInt(req.query.timestamp),
             "balances": []
 
     };

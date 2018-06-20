@@ -17,14 +17,20 @@ test('bx depth', function (done) {
 
       for (let i = 0; i < depth['asks'].length; i++) {
         for (let j = 0; j < 2; j++) {
-          expect(typeof depth['bids'][i][j]).toBe('string');
-          expect(typeof depth['bids'][i][j]).toBe('string');
+            console.log(i, j);
           expect(typeof depth['asks'][i][j]).toBe('string');
           expect(typeof depth['asks'][i][j]).toBe('string');
-          expect(typeof parseFloat(depth['bids'][i][j])).toBe('number');
-          expect(typeof parseFloat(depth['bids'][i][j])).toBe('number');
           expect(typeof parseFloat(depth['asks'][i][j])).toBe('number');
           expect(typeof parseFloat(depth['asks'][i][j])).toBe('number');
+        }
+      }
+      for (let i = 0; i < depth['bids'].length; i++) {
+        for (let j = 0; j < 2; j++) {
+            console.log(i, j);
+          expect(typeof depth['bids'][i][j]).toBe('string');
+          expect(typeof depth['bids'][i][j]).toBe('string');
+          expect(typeof parseFloat(depth['bids'][i][j])).toBe('number');
+          expect(typeof parseFloat(depth['bids'][i][j])).toBe('number');
         }
       }
       done();
@@ -39,19 +45,19 @@ test('bx account', function (done) {
     .then(response => {
       expect(response.statusCode).toBe(200);
       expect(response.body).toHaveProperty('makerCommission');
-      expect(typeof response.body.makerCommission).toBe('number');
+      expect(response.body.makerCommission).toBe(null);
       expect(response.body).toHaveProperty('takerCommission');
-      expect(typeof response.body.takerCommission).toBe('number');
+      expect(response.body.takerCommission).toBe(null);
       expect(response.body).toHaveProperty('buyerCommission');
-      expect(typeof response.body.buyerCommission).toBe('number');
+      expect(response.body.buyerCommission).toBe(null);
       expect(response.body).toHaveProperty('sellerCommission');
-      expect(typeof response.body.sellerCommission).toBe('number');
+      expect(response.body.sellerCommission).toBe(null);
       expect(response.body).toHaveProperty('canTrade');
-      expect(typeof response.body.canTrade).toBe('boolean');
+      expect(response.body.canTrade).toBe(null);
       expect(response.body).toHaveProperty('canWithdraw');
-      expect(typeof response.body.canWithdraw).toBe('boolean');
+      expect(response.body.canWithdraw).toBe(null);
       expect(response.body).toHaveProperty('canDeposit');
-      expect(typeof response.body.canDeposit).toBe('boolean');
+      expect(response.body.canDeposit).toBe(null);
       expect(response.body).toHaveProperty('updateTime');
       expect(typeof response.body.updateTime).toBe('number');
       expect(response.body).toHaveProperty('balances');
@@ -91,10 +97,10 @@ test('bx allOrders', function (done) {
         expect(allOrders[i].symbol).toBe(symbol);
 
         expect(allOrders[i]).toHaveProperty('orderId');
-        expect(typeof allOrders[i].orderId).toBe('number');
+        expect(typeof allOrders[i].orderId).toBe('string');
 
         expect(allOrders[i]).toHaveProperty('clientOrderId');
-        expect(typeof allOrders[i].clientOrderId).toBe('string');
+        expect(allOrders[i].clientOrderId).toBe(null);
 
         expect(allOrders[i]).toHaveProperty('price');
         expect(typeof allOrders[i].price).toBe('string');
@@ -105,34 +111,34 @@ test('bx allOrders', function (done) {
         expect(typeof parseFloat(allOrders[i].origQty)).toBe('number');
 
         expect(allOrders[i]).toHaveProperty('executedQty');
-        expect(typeof allOrders[i].executedQty).toBe('string');
-        expect(typeof parseFloat(allOrders[i].executedQty)).toBe('number');
+        // expect(typeof allOrders[i].executedQty).toBe('string');
+        expect(allOrders[i].executedQty).toBe(null);
 
         expect(allOrders[i]).toHaveProperty('status');
-        expect(typeof allOrders[i].status).toBe('string');
+        expect(allOrders[i].status).toBe(null);
 
         expect(allOrders[i]).toHaveProperty('timeInForce');
-        expect(typeof allOrders[i].timeInForce).toBe('string');
+        expect(allOrders[i].timeInForce).toBe(null);
 
         expect(allOrders[i]).toHaveProperty('type');
-        expect(typeof allOrders[i].type).toBe('string');
+        expect(allOrders[i].type).toBe(null);
 
         expect(allOrders[i]).toHaveProperty('side');
         expect(typeof allOrders[i].side).toBe('string');
 
         expect(allOrders[i]).toHaveProperty('stopPrice');
-        expect(typeof allOrders[i].stopPrice).toBe('string');
-        expect(typeof parseFloat(allOrders[i].stopPrice)).toBe('number');
+        // expect(typeof allOrders[i].stopPrice).toBe('string');
+        expect(allOrders[i].stopPrice).toBe(null);
 
         expect(allOrders[i]).toHaveProperty('icebergQty');
-        expect(typeof allOrders[i].icebergQty).toBe('string');
-        expect(typeof parseFloat(allOrders[i].icebergQty)).toBe('number');
+        // expect(typeof allOrders[i].icebergQty).toBe('string');
+        expect(allOrders[i].icebergQty).toBe(null);
 
         expect(allOrders[i]).toHaveProperty('time');
         expect(typeof allOrders[i].time).toBe('number');
 
         expect(allOrders[i]).toHaveProperty('isWorking');
-        expect(typeof allOrders[i].isWorking).toBe('boolean');
+        expect(allOrders[i].isWorking).toBe(null);
       }
       done();
     })
@@ -167,7 +173,7 @@ test('bx create and cancel order', async function (done) {
   expect(sellResponse.body.symbol).toBe(symbol);
 
   expect(sellResponse.body).toHaveProperty('clientOrderId');
-  expect(typeof sellResponse.body.clientOrderId).toBe('string');
+  expect(sellResponse.body.clientOrderId).toBe(null);
 
   expect(sellResponse.body).toHaveProperty('price');
   expect(typeof sellResponse.body.price).toBe('string');
@@ -180,27 +186,23 @@ test('bx create and cancel order', async function (done) {
   expect(parseFloat(sellResponse.body.origQty)).toBe(parseFloat(quantity));
 
   expect(sellResponse.body).toHaveProperty('executedQty');
-  expect(typeof sellResponse.body.executedQty).toBe('string');
-  expect(typeof parseFloat(sellResponse.body.executedQty)).toBe('number');
+  expect(sellResponse.body.executedQty).toBe(null);
 
   expect(sellResponse.body).toHaveProperty('status');
-  expect(typeof sellResponse.body.status).toBe('string');
-  expect(sellResponse.body.status).toBe('NEW');
+  expect(sellResponse.body.status).toBe(null);
 
   expect(sellResponse.body).toHaveProperty('timeInForce');
-  expect(typeof sellResponse.body.timeInForce).toBe('string');
-  expect(sellResponse.body.timeInForce).toBe(timeInForce);
+  expect(sellResponse.body.timeInForce).toBe(null);
 
   expect(sellResponse.body).toHaveProperty('type');
-  expect(typeof sellResponse.body.type).toBe('string');
-  expect(sellResponse.body.type).toBe(type);
+  expect(sellResponse.body.type).toBe(null);
 
   expect(sellResponse.body).toHaveProperty('side');
   expect(typeof sellResponse.body.side).toBe('string');
   expect(sellResponse.body.side).toBe(side);
 
   expect(sellResponse.body).toHaveProperty('orderId');
-  expect(typeof sellResponse.body.orderId).toBe('number');
+  expect(typeof sellResponse.body.orderId).toBe('string');
 
   expect(sellResponse.body).toHaveProperty('transactTime');
   expect(typeof sellResponse.body.transactTime).toBe('number');
@@ -213,7 +215,7 @@ test('bx create and cancel order', async function (done) {
       exchange: 'bx',
       symbol: symbol,
       orderId: orderId,
-      timestamp: Math.round(new Date().getTime() / 1000)
+      timestamp: Math.round(new Date().getTime() / 1000) + 1
     })
     .set('Accept', 'application/json');
 
@@ -222,13 +224,13 @@ test('bx create and cancel order', async function (done) {
   expect(cancelResponse.body.symbol).toBe(symbol);
 
   expect(cancelResponse.body).toHaveProperty('origClientOrderId');
-  expect(typeof cancelResponse.body.origClientOrderId).toBe('string');
+  expect(cancelResponse.body.origClientOrderId).toBe(null);
 
   expect(cancelResponse.body).toHaveProperty('clientOrderId');
-  expect(typeof cancelResponse.body.clientOrderId).toBe('string');
+  expect(cancelResponse.body.clientOrderId).toBe(null);
 
   expect(cancelResponse.body).toHaveProperty('orderId');
-  expect(typeof cancelResponse.body.orderId).toBe('number');
+  expect(typeof cancelResponse.body.orderId).toBe('string');
 
   done();
 });
