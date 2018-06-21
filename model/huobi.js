@@ -154,7 +154,7 @@ let obj = {
                 } else if (body['err-code'].substring(0, 41) === 'account-frozen-balance-insufficient-error') {
                     return next(new ExchangeError('Trade account balance is not enough.', 9501));
                 } else if (body['err-code'].substring(0, 41) === 'require-account-id') {
-                    return next(new ExchangeError('Paramemter `account-id` is required.', 9502));
+                    return next(new ExchangeError('Parameter `account-id` is required.', 9502));
                 } else {
                     return next(new ExchangeError('An unknown error occured while processing the request.', 1000));
                 }

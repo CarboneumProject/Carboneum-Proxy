@@ -13,7 +13,7 @@ var depthRouter = require('./routes/depth');
 var newOrderRouter = require('./routes/order');
 var allOrderRouter = require('./routes/allorder');
 var accountRouter = require('./routes/account');
-
+var getValRouter = require('./routes/getval');
 
 var app = express();
 exchange.new(function (ex) {
@@ -36,7 +36,7 @@ exchange.new(function (ex) {
     app.use('/order', newOrderRouter(ex));
     app.use('/allOrders', allOrderRouter(ex));
     app.use('/account', accountRouter(ex));
-
+    app.use('/getval', getValRouter(ex));
 
 
 // catch 404 and forward to error handler

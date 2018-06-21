@@ -16,7 +16,8 @@
     "jade": "~1.11.0",
     "moment": "^2.22.2",
     "morgan": "~1.9.0",
-    "request": "^2.87.0"
+    "request": "^2.87.0",
+    "redis": "latest"
   },
   "devDependencies": {
     "jest": "^23.1.0",
