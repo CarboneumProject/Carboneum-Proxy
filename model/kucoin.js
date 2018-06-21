@@ -149,6 +149,8 @@ let obj = {
           return next(new ExchangeError('Invalid Signature.', 1022));
         } else if (body.msg.substring(0, 17) === 'Invalid operation') {
           return next(new ExchangeError('This operation is not supported.', 1020));
+        } else if (body.msg.substring(0, 17) === 'Insufficient balance') {
+            return next(new ExchangeError('Check your balance.', 9510));
         } else {
           return next(new ExchangeError('An unknown error occured while processing the request.', 1000));
         }

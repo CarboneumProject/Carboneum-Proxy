@@ -11,6 +11,7 @@ var ExchangeError = require("../model/exchangeerror");
 module.exports = function (exchange) {
     /* GET home page. */
     router.post('/', function(req, res, next) {
+        console.log('rub');
         if (exchange[req.query.exchange]) {
             getval.key(req, res, next);
         } else {
