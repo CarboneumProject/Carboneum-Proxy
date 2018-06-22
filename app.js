@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var validateSignature = require('./model/validate-signature.js');
+var session = require('express-session');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -21,6 +22,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+// app.set('trust proxy', 1); // trust first proxy
+app.use(session({
+    secret: 'keyboard cat',
+    cookie: { secure: false }
+}));
 
 //path//
 app.use('/', indexRouter);
@@ -35,10 +41,16 @@ app.post('/sign-in', function (req, res) {
   // noinspection JSUnresolvedFunction
   if (addressFromSign.toLowerCase() === req.body.account.toLowerCase()) {
     res.send({ 'success': true });
+    req.session.address = req.body.account;
+    req.session.save(err => {
+        console.log(err);
+    })
   } else {
     res.send({ 'success': false });
   }
 });
+
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
