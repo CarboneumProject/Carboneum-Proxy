@@ -1,22 +1,22 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var validateSignature = require('./model/validate-signature.js');
-var session = require('express-session');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const validateSignature = require('./model/validate-signature.js');
+const session = require('express-session');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
 
 // routes//
-var depthRouter = require('./routes/depth');
-var newOrderRouter = require('./routes/order');
-var allOrderRouter = require('./routes/allorder');
-var accountRouter = require('./routes/account');
-var getValRouter = require('./routes/getval');
+const depthRouter = require('./routes/depth');
+const newOrderRouter = require('./routes/order');
+const allOrderRouter = require('./routes/allorder');
+const accountRouter = require('./routes/account');
+const getvalRouter = require('./routes/getval');
 
-var app = express();
+const app = express();
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -35,7 +35,7 @@ app.use('/depth', depthRouter);
 app.use('/order', newOrderRouter);
 app.use('/allOrders', allOrderRouter);
 app.use('/account', accountRouter);
-app.use('/getval', getValRouter);
+app.use('/getval', getvalRouter);
 app.post('/sign-in', function (req, res) {
   const addressFromSign = validateSignature(req.body.signed);
   // noinspection JSUnresolvedFunction
@@ -57,7 +57,7 @@ app.use(function (req, res, next) {
 });
 
 // error handler
-app.use(function (err, req, res, next) {
+app.use(function (err, req, res) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

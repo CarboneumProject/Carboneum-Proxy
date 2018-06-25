@@ -1,9 +1,13 @@
-var request = require("request");
-var CryptoJS = require("crypto-js");
-var getval = require("./getval");
+const request = require("request");
+// noinspection SpellCheckingInspection
+const CryptoJS = require("crypto-js");
+// noinspection SpellCheckingInspection
+const getval = require("./getval");
 
-var symbol = require("./symbol");
-var ExchangeError = require("./exchangeerror");
+
+const symbol = require("./symbol");
+const ExchangeError = require("./exchangeerror");
+
 
 async function getvalue(req) {
     let secret = await getval.get(req.session.address + ":" + req.query.exchange + ":SECRET_KEY");
@@ -16,6 +20,7 @@ async function getvalue(req) {
         return {err: new ExchangeError('Required API_KEY.', 7001)};
     }
 
+    // noinspection JSUnresolvedVariable
     return {
         api_key: api_key,
         secret_key: secret_key
@@ -27,10 +32,12 @@ function genSignature(form, path, nonce, secret_key) {
     let queryString = [];
     if (form !== undefined) {
         for (let key in form) {
-            if (key !== 'timestamp' && key !== 'signature') {
-                queryString.push(key + '=' + form[key]);
-                console.log(key);
-                console.log(form[key]);
+            if (form.hasOwnProperty(key)) {
+                if (key !== 'timestamp' && key !== 'signature') {
+                    queryString.push(key + '=' + form[key]);
+                    console.log(key);
+                    console.log(form[key]);
+                }
             }
         }
         queryString.sort();
@@ -51,10 +58,11 @@ function genSignature(form, path, nonce, secret_key) {
 let obj = {
     depth: function (req, res, next) {
 
+        let symbolName;
         let nonce = new Date().getTime();
 
         try {
-            var symbolName = symbol.carboneum[req.query.symbol].kucoin;
+            symbolName = symbol.carboneum[req.query.symbol].kucoin;
         } catch (e) {
             symbolName = req.query.symbol;
         }
@@ -65,7 +73,7 @@ let obj = {
             "asks": []
         };
 
-        var options = {
+        let options = {
             method: 'GET',
             url: 'https://api.kucoin.com/v1/open/orders',
             qs: {
@@ -91,23 +99,38 @@ let obj = {
                 }
             }
 
+            // noinspection JSUnresolvedVariable
             for (let i in body.data.BUY) {
-                body.data.BUY[i] = toString(body.data.BUY[i]);
+                // noinspection JSUnresolvedVariable
                 if (body.data.BUY.hasOwnProperty(i)) {
-                    depthKc.bids.push([
-                        body.data.BUY[i][0],
-                        body.data.BUY[i][1]
-                    ]);
+                    // noinspection JSUnresolvedVariable
+                    body.data.BUY[i] = `${body.data.BUY[i]}`;
+                    // noinspection JSUnresolvedVariable
+                    if (body.data.BUY.hasOwnProperty(i)) {
+                        // noinspection JSUnresolvedVariable
+                        depthKc.bids.push([
+                            body.data.BUY[i][0],
+                            body.data.BUY[i][1]
+                        ]);
+                    }
                 }
             }
 
+
+            // noinspection JSUnresolvedVariable
             for (let i in body.data.SELL) {
-                body.data.SELL[i] = toString(body.data.SELL[i]);
+                // noinspection JSUnresolvedVariable
                 if (body.data.SELL.hasOwnProperty(i)) {
-                    depthKc.asks.push([
-                        body.data.SELL[i][0],
-                        body.data.SELL[i][1]
-                    ]);
+                    // noinspection JSUnresolvedVariable
+                    body.data.SELL[i] = `${body.data.SELL[i]}`;
+                    // noinspection JSUnresolvedVariable
+                    if (body.data.SELL.hasOwnProperty(i)) {
+                        // noinspection JSUnresolvedVariable
+                        depthKc.asks.push([
+                            body.data.SELL[i][0],
+                            body.data.SELL[i][1]
+                        ]);
+                    }
                 }
             }
             console.log(body);
@@ -118,6 +141,7 @@ let obj = {
 
     newOrder: async function (req, res, next) {
 
+        let symbolName;
         let nonce = new Date().getTime();
 
         const key = await getvalue(req);
@@ -127,7 +151,7 @@ let obj = {
         }
 
         try {
-            var symbolName = symbol.carboneum[req.body.symbol].kucoin;
+            symbolName = symbol.carboneum[req.body.symbol].kucoin;
         } catch (e) {
             symbolName = req.body.symbol;
         }
@@ -146,12 +170,9 @@ let obj = {
             amount: req.body.quantity
         }, '/v1/order', nonce, key.secret_key);
 
-        var options = {
+        let options = {
             method: 'POST',
             url: 'https://api.kucoin.com/v1/order',
-            // qs: {
-            //     symbol: symbolName
-            // },
             headers:
                 {
                     'Cache-Control': 'no-cache',
@@ -200,6 +221,7 @@ let obj = {
 
     allOrder: async function (req, res, next) {
 
+        let symbolName;
         let nonce = new Date().getTime();
 
         const key = await getvalue(req);
@@ -209,7 +231,7 @@ let obj = {
         }
 
         try {
-            var symbolName = symbol.carboneum[req.query.symbol].kucoin;
+            symbolName = symbol.carboneum[req.query.symbol].kucoin;
         } catch (e) {
             symbolName = req.query.symbol;
         }
@@ -224,7 +246,7 @@ let obj = {
             symbol: symbolName
         };
 
-        var options = {
+        let options = {
             method: 'GET',
             url: 'https://api.kucoin.com/v1/order/active',
             headers:
@@ -253,42 +275,52 @@ let obj = {
                 }
             }
 
+            // noinspection JSUnresolvedVariable
             for (let i in body.data.SELL) {
-                toKucoin.push({
-                    "symbol": req.query.symbol,
-                    "orderId": body.data.SELL[i][5],
-                    "clientOrderId": null,
-                    "price": body.data.SELL[i][2].toString(),
-                    "origQty": body.data.SELL[i][3].toString(),
-                    "executedQty": null,
-                    "status": null,
-                    "timeInForce": null,
-                    "type": null,
-                    "side": body.data.SELL[i][1],
-                    "stopPrice": null,
-                    "icebergQty": null,
-                    "time": body.data.SELL[i][0],
-                    "isWorking": null
-                });
+                // noinspection JSUnresolvedVariable
+                if (body.data.SELL.hasOwnProperty(i)) {
+                    // noinspection JSUnresolvedVariable
+                    toKucoin.push({
+                        "symbol": req.query.symbol,
+                        "orderId": body.data.SELL[i][5],
+                        "clientOrderId": null,
+                        "price": body.data.SELL[i][2].toString(),
+                        "origQty": body.data.SELL[i][3].toString(),
+                        "executedQty": null,
+                        "status": null,
+                        "timeInForce": null,
+                        "type": null,
+                        "side": body.data.SELL[i][1],
+                        "stopPrice": null,
+                        "icebergQty": null,
+                        "time": body.data.SELL[i][0],
+                        "isWorking": null
+                    });
+                }
             }
 
+            // noinspection JSUnresolvedVariable
             for (let i in body.data.BUY) {
-                toKucoin.push({
-                    "symbol": req.query.symbol,
-                    "orderId": body.data.BUY[i][5],
-                    "clientOrderId": null,
-                    "price": body.data.BUY[i][2],
-                    "origQty": body.data.BUY[i][3],
-                    "executedQty": null,
-                    "status": null,
-                    "timeInForce": null,
-                    "type": null,
-                    "side": body.data.BUY[i][1],
-                    "stopPrice": null,
-                    "icebergQty": null,
-                    "time": body.data.BUY[i][0],
-                    "isWorking": null
-                });
+                // noinspection JSUnresolvedVariable
+                if (body.data.BUY.hasOwnProperty(i)) {
+                    // noinspection JSUnresolvedVariable
+                    toKucoin.push({
+                        "symbol": req.query.symbol,
+                        "orderId": body.data.BUY[i][5],
+                        "clientOrderId": null,
+                        "price": body.data.BUY[i][2],
+                        "origQty": body.data.BUY[i][3],
+                        "executedQty": null,
+                        "status": null,
+                        "timeInForce": null,
+                        "type": null,
+                        "side": body.data.BUY[i][1],
+                        "stopPrice": null,
+                        "icebergQty": null,
+                        "time": body.data.BUY[i][0],
+                        "isWorking": null
+                    });
+                }
             }
 
             console.log(body);
@@ -299,6 +331,7 @@ let obj = {
 
     deleteOrder: async function (req, res, next) {
 
+        let symbolName;
         let nonce = new Date().getTime();
 
         const key = await getvalue(req);
@@ -309,7 +342,7 @@ let obj = {
 
 
         try {
-            var symbolName = symbol.carboneum[req.query.symbol].kucoin;
+            symbolName = symbol.carboneum[req.query.symbol].kucoin;
         } catch (e) {
             symbolName = req.query.symbol;
         }
@@ -320,7 +353,7 @@ let obj = {
             orderOid: req.query.orderId,
         }, '/v1/order/detail', nonce, key.secret_key);
 
-        var options = {
+        let options = {
             method: 'GET',
             url: 'https://api.kucoin.com/v1/order/detail',
             headers:
@@ -341,8 +374,9 @@ let obj = {
         request(options, function (error, response, body) {
 
 
+            let symbolName;
             try {
-                var symbolName = symbol.carboneum[req.query.symbol].kucoin;
+                symbolName = symbol.carboneum[req.query.symbol].kucoin;
             } catch (e) {
                 symbolName = req.query.symbol;
             }
@@ -367,7 +401,7 @@ let obj = {
                 orderOid: req.query.orderId,
             }, '/v1/cancel-order', nonce, key.secret_key);
 
-            var options = {
+            let options = {
                 method: 'POST',
                 url: 'https://api.kucoin.com/v1/cancel-order',
                 headers:
@@ -430,7 +464,7 @@ let obj = {
             "balances": []
         };
 
-        var options = {
+        let options = {
             method: 'GET',
             url: 'https://api.kucoin.com/v1/account/balances',
             headers:
@@ -462,12 +496,15 @@ let obj = {
                 }
             }
 
+            // noinspection JSUnresolvedVariable
             for (let i in body.data.datas) {
+                // noinspection JSUnresolvedVariable
                 if (body.data.datas.hasOwnProperty(i)) {
+                    // noinspection JSUnresolvedVariable
                     accKc.balances.push({
                         "asset": body.data.datas[i].coinType,
-                        "free": toString(body.data.datas[i].balance),
-                        "locked": toString(body.data.datas[i].freezeBalance)
+                        "free": `${body.data.datas[i].balance}`,
+                        "locked": `${body.data.datas[i].freezeBalance}`
                     });
                 }
             }

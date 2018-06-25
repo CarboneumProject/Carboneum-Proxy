@@ -1,7 +1,7 @@
-var express = require('express');
-var router = express.Router();
-var exchange = require('../model/exchange');
-var ExchangeError = require("../model/exchangeerror");
+const express = require('express');
+const router = express.Router();
+const exchange = require('../model/exchange');
+const ExchangeError = require("../model/exchangeerror");
 
 router.get('/', function (req, res, next) {
   if (exchange[req.query.exchange]) {

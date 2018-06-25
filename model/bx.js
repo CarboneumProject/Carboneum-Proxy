@@ -1,9 +1,11 @@
-var request = require("request");
-var CryptoJS = require("crypto-js");
-var getval = require("./getval");
+const request = require("request");
+// noinspection SpellCheckingInspection
+const CryptoJS = require("crypto-js");
+// noinspection SpellCheckingInspection
+const getval = require("./getval");
 
-var symbol = require("./symbol");
-var ExchangeError = require("./exchangeerror");
+const symbol = require("./symbol");
+const ExchangeError = require("./exchangeerror");
 
 async function getvalue(req) {
     let secret = await getval.get(req.session.address + ":" + req.query.exchange + ":SECRET_KEY");
@@ -16,6 +18,7 @@ async function getvalue(req) {
         return {err: new ExchangeError('Required API_KEY.', 7001)};
     }
 
+    // noinspection JSUnresolvedVariable
     return {
         api_key: api_key,
         secret_key: secret_key
@@ -29,15 +32,14 @@ function genSignature(form, secret_key) {
     queryString = queryString.join('');
 
     console.log(queryString);
-    let signatureResult = CryptoJS.SHA256(queryString + secret_key).toString(CryptoJS.enc.Hex);
-    form.signature = signatureResult;
+    form.signature = CryptoJS.SHA256(queryString + secret_key).toString(CryptoJS.enc.Hex);
 }
 
 let obj = {
     depth: function (req, res) {
 
         let nonce = new Date().getTime();
-        var options = {
+        let options = {
             method: 'GET',
             url: 'https://bx.in.th/api/orderbook/',
             qs: {
@@ -83,7 +85,7 @@ let obj = {
 
         genSignature(form, key.secret_key);
         console.log(form);
-        var options = {
+        let options = {
             method: 'POST',
             url: 'https://bx.in.th/api/order',
             headers:
@@ -151,7 +153,7 @@ let obj = {
         let toBinance = [];
 
         genSignature(form, key.secret_key);
-        var options = {
+        let options = {
             method: 'POST',
             url: 'https://bx.in.th/api/getorders/',
             headers:
@@ -179,25 +181,31 @@ let obj = {
                 }
             }
 
+            // noinspection JSUnresolvedVariable
             for (let i in body.orders) {
-                body.orders[i].pairing_id = symbol.bx[body.orders[i].pairing_id];
+                // noinspection JSUnresolvedVariable
+                if (body.orders.hasOwnProperty(i)) {
+                    // noinspection JSUnresolvedVariable
+                    body.orders[i].pairing_id = symbol.bx[body.orders[i].pairing_id];
 
-                toBinance.push({
-                    "symbol": body.orders[i].pairing_id,
-                    "orderId": body.orders[i].order_id.toString(),
-                    "clientOrderId": null,
-                    "price": body.orders[i].rate.toString(),
-                    "origQty": body.orders[i].amount.toString(),
-                    "executedQty": null,
-                    "status": null,
-                    "timeInForce": null,
-                    "type": null,
-                    "side": body.orders[i].order_type.toUpperCase(),
-                    "stopPrice": null,
-                    "icebergQty": null,
-                    "time": Date.parse(body.orders[i].date) / 1000,
-                    "isWorking": null
-                });
+                    // noinspection JSUnresolvedVariable
+                    toBinance.push({
+                        "symbol": body.orders[i].pairing_id,
+                        "orderId": body.orders[i].order_id.toString(),
+                        "clientOrderId": null,
+                        "price": body.orders[i].rate.toString(),
+                        "origQty": body.orders[i].amount.toString(),
+                        "executedQty": null,
+                        "status": null,
+                        "timeInForce": null,
+                        "type": null,
+                        "side": body.orders[i].order_type.toUpperCase(),
+                        "stopPrice": null,
+                        "icebergQty": null,
+                        "time": Date.parse(body.orders[i].date) / 1000,
+                        "isWorking": null
+                    });
+                }
             }
             console.log(toBinance);
             res.send(toBinance);
@@ -220,7 +228,7 @@ let obj = {
         };
 
         genSignature(form, key.secret_key);
-        var options = {
+        let options = {
             method: 'POST',
             url: 'https://bx.in.th/api/cancel/',
             headers:
@@ -284,7 +292,8 @@ let obj = {
         };
 
         genSignature(form, key.secret_key);
-        var options = {
+
+        let options = {
             method: 'POST',
             url: 'https://bx.in.th/api/balance/',
             headers:
@@ -310,8 +319,11 @@ let obj = {
                 }
             }
 
+            // noinspection JSUnresolvedVariable
             for (let i in body.balance) {
+                // noinspection JSUnresolvedVariable
                 if (body.balance.hasOwnProperty(i)) {
+                    // noinspection JSUnresolvedVariable
                     accBx.balances.push({
                         "asset": i,
                         "free": body.balance[i].available,

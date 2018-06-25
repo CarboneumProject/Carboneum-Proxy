@@ -1,8 +1,9 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+// noinspection JSUnresolvedFunction
+const router = express.Router();
 
-var exchange = require('../model/exchange');
-var ExchangeError = require("../model/exchangeerror");
+const exchange = require('../model/exchange');
+const ExchangeError = require("../model/exchangeerror");
 
 
 router.post('/', function (req, res, next) {

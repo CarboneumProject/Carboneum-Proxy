@@ -1,11 +1,11 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var getval = require("../model/getval");
-var exchange = require("../model/exchange");
+const getval = require("../model/getval");
+const exchange = require("../model/exchange");
 
 
-var ExchangeError = require("../model/exchangeerror");
+const ExchangeError = require("../model/exchangeerror");
 
 router.post('/', function(req, res, next) {
     if (exchange[req.query.exchange]) {

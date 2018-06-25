@@ -1,11 +1,14 @@
-var request = require("request");
-var CryptoJS = require("crypto-js");
-var moment = require('moment');
-var getval = require("./getval");
+const request = require("request");
+// noinspection SpellCheckingInspection
+const CryptoJS = require("crypto-js");
+const moment = require('moment');
+// noinspection SpellCheckingInspection
+const getval = require("./getval");
 
-var symbol = require("./symbol");
-var ExchangeError = require("./exchangeerror");
+const symbol = require("./symbol");
+const ExchangeError = require("./exchangeerror");
 
+// noinspection SpellCheckingInspection
 async function getvalue(req) {
     let secret = await getval.get(req.session.address + ":" + req.query.exchange + ":SECRET_KEY");
     if (secret === null) {
@@ -17,6 +20,7 @@ async function getvalue(req) {
         return {err: new ExchangeError('Required API_KEY.', 7001)};
     }
 
+    // noinspection JSUnresolvedVariable
     return {
         api_key: api_key,
         secret_key: secret_key
@@ -27,10 +31,12 @@ function genSignature(method, host_url, path, form, nonce, secret_key, api_key) 
     let queryString = [];
     if (form !== undefined) {
         for (let key in form) {
-            if (key !== 'Timestamp' && key !== 'Signature' && key !== 'AccessKeyId') {
-                queryString.push(key + '=' + form[key]);
-                console.log(key);
-                console.log(form[key]);
+            if (form.hasOwnProperty(key)) {
+                if (key !== 'Timestamp' && key !== 'Signature' && key !== 'AccessKeyId') {
+                    queryString.push(key + '=' + form[key]);
+                    console.log(key);
+                    console.log(form[key]);
+                }
             }
         }
     }
@@ -51,10 +57,11 @@ function genSignature(method, host_url, path, form, nonce, secret_key, api_key) 
 let obj = {
     depth: function (req, res, next) {
 
+        let symbolName;
         let nonce = new Date().getTime();
 
         try {
-            var symbolName = symbol.carboneum[req.query.symbol].huobi;
+            symbolName = symbol.carboneum[req.query.symbol].huobi;
         } catch (e) {
             symbolName = req.query.symbol;
         }
@@ -65,7 +72,7 @@ let obj = {
             "asks": []
         };
 
-        var options = {
+        let options = {
             method: 'GET',
             url: 'https://api.huobi.pro/market/depth',
             qs: {
@@ -114,6 +121,7 @@ let obj = {
 
     newOrder: async function (req, res, next) {
 
+        let symbolName;
         const key = await getvalue(req);
 
         if (key.hasOwnProperty('err')) {
@@ -132,7 +140,7 @@ let obj = {
         console.log(req.body.side);
 
         try {
-            var symbolName = symbol.carboneum[req.body.symbol].huobi;
+            symbolName = symbol.carboneum[req.body.symbol].huobi;
         } catch (e) {
             symbolName = req.body.symbol;
         }
@@ -154,7 +162,7 @@ let obj = {
             SignatureVersion: '2'
         };
 
-        var options = {
+        let options = {
             method: 'POST',
             url: 'https://api.huobi.pro/v1/order/orders/place',
             qs: form,
@@ -218,6 +226,7 @@ let obj = {
 
     allOrder: async function (req, res, next) {
 
+        let symbolName;
         const key = await getvalue(req);
 
         if (key.hasOwnProperty('err')) {
@@ -227,7 +236,7 @@ let obj = {
         let nonce = moment().toISOString().substring(0, 19);
 
         try {
-            var symbolName = symbol.carboneum[req.query.symbol].huobi;
+            symbolName = symbol.carboneum[req.query.symbol].huobi;
         } catch (e) {
             symbolName = req.query.symbol;
         }
@@ -254,7 +263,7 @@ let obj = {
             SignatureVersion: '2',
             states: 'submitted',
         };
-        var options = {
+        let options = {
             method: 'GET',
             url: 'https://api.huobi.pro/v1/order/orders',
             qs: form,
@@ -275,30 +284,32 @@ let obj = {
             }
 
             for (let i in body.data) {
-                body.data[i].symbol = symbol.huobi[body.data[i].symbol];
-                body.data[i].type = body.data[i].type.toUpperCase();
+                if (body.data.hasOwnProperty(i)) {
+                    body.data[i].symbol = symbol.huobi[body.data[i].symbol];
+                    body.data[i].type = body.data[i].type.toUpperCase();
 
-                if (body.data[i].type === "SELL-LIMIT") {
-                    body.data[i].type = body.data[i].type.substring(0, 4)
-                } else {
-                    body.data[i].type = body.data[i].type.substring(0, 3)
+                    if (body.data[i].type === "SELL-LIMIT") {
+                        body.data[i].type = body.data[i].type.substring(0, 4)
+                    } else {
+                        body.data[i].type = body.data[i].type.substring(0, 3)
+                    }
+                    toHuobi.push({
+                        "symbol": body.data[i].symbol,
+                        "orderId": body.data[i].id.toString(),
+                        "clientOrderId": null,
+                        "price": body.data[i].price,
+                        "origQty": body.data[i].amount,
+                        "executedQty": null,
+                        "status": null,
+                        "timeInForce": null,
+                        "type": null,
+                        "side": body.data[i].type,
+                        "stopPrice": null,
+                        "icebergQty": null,
+                        "time": body.data[i]['created-at'],
+                        "isWorking": null
+                    });
                 }
-                toHuobi.push({
-                    "symbol": body.data[i].symbol,
-                    "orderId": body.data[i].id.toString(),
-                    "clientOrderId": null,
-                    "price": body.data[i].price,
-                    "origQty": body.data[i].amount,
-                    "executedQty": null,
-                    "status": null,
-                    "timeInForce": null,
-                    "type": null,
-                    "side": body.data[i].type,
-                    "stopPrice": null,
-                    "icebergQty": null,
-                    "time": body.data[i]['created-at'],
-                    "isWorking": null
-                });
             }
 
             console.log(body);
@@ -338,7 +349,7 @@ let obj = {
             SignatureVersion: '2',
         };
 
-        var options = {
+        let options = {
             method: 'POST',
             url: `https://api.huobi.pro/v1/order/orders/${orderId}/submitcancel`,
             form: form,
@@ -364,7 +375,7 @@ let obj = {
             res.send({
                 "symbol": null,
                 "origClientOrderId": null,
-                "orderId": toString(body.data),
+                "orderId": `${body.data}`,
                 "clientOrderId": null
             });
         });
@@ -411,7 +422,7 @@ let obj = {
         };
         console.log(accHb);
 
-        var options = {
+        let options = {
             method: 'GET',
             url: `https://api.huobi.pro/v1/account/accounts/${process.env.HUOBI_ACC}/balance`,
             qs: form,
@@ -438,10 +449,12 @@ let obj = {
             for (let i in body.data.list) {
                 if (body.data.list.hasOwnProperty(i)) {
                     if (i % 2 === 1) {
+                        // noinspection JSUnresolvedVariable
                         temp["locked"] = body.data.list[i].balance;
                         accHb.balances.push(temp);
                         temp = {};
                     } else {
+                        // noinspection JSUnresolvedVariable
                         temp = {
                             "asset": body.data.list[i].currency.toUpperCase(),
                             "free": body.data.list[i].balance,

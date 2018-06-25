@@ -1,7 +1,7 @@
-var binance = require('./binance');
-var bx = require('./bx');
-var kucoin = require('./kucoin');
-var huobi = require('./huobi');
+const binance = require('./binance');
+const bx = require('./bx');
+const kucoin = require('./kucoin');
+const huobi = require('./huobi');
 
 const exchange = {
     binance: binance,

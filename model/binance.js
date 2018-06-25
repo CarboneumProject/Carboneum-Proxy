@@ -1,9 +1,11 @@
-var request = require("request");
-var CryptoJS = require("crypto-js");
-var getval = require("./getval");
+const request = require("request");
+// noinspection SpellCheckingInspection
+const CryptoJS = require("crypto-js");
+// noinspection SpellCheckingInspection
+const getval = require("./getval");
 
-var symbol = require("./symbol");
-var ExchangeError = require("./exchangeerror");
+const symbol = require("./symbol");
+const ExchangeError = require("./exchangeerror");
 
 
 async function getvalue(req) {
@@ -17,6 +19,7 @@ async function getvalue(req) {
         return {err: new ExchangeError('Required API_KEY.', 7001)};
     }
 
+    // noinspection JSUnresolvedVariable
     return {
         api_key: api_key,
         secret_key: secret_key
@@ -28,10 +31,12 @@ function genSignature(form, secret_key) {
     let queryString = [];
     if (form !== undefined) {
         for (let key in form) {
-            if (key !== 'timestamp' && key !== 'signature') {
-                queryString.push(key + '=' + form[key]);
-                console.log(key);
-                console.log(form[key]);
+            if (form.hasOwnProperty(key)) {
+                if (key !== 'timestamp' && key !== 'signature') {
+                    queryString.push(key + '=' + form[key]);
+                    console.log(key);
+                    console.log(form[key]);
+                }
             }
         }
     }
@@ -40,12 +45,11 @@ function genSignature(form, secret_key) {
     queryString = queryString.join('&');
 
     console.log(queryString);
-    let signatureResult = CryptoJS.HmacSHA256(queryString, secret_key).toString(CryptoJS.enc.Hex);
-    form.signature = signatureResult;
+    form.signature = CryptoJS.HmacSHA256(queryString, secret_key).toString(CryptoJS.enc.Hex);
 }
 
 function deleteField(form) {
-    let optionals = ['newClientOrderId', 'stopPrice', 'icebergQty', 'newOrderRespType']
+    let optionals = ['newClientOrderId', 'stopPrice', 'icebergQty', 'newOrderRespType'];
     for (let i = 0; i < optionals.length; i++) {
         if (form[optionals[i]] === undefined) {
             delete form[optionals[i]];
@@ -56,15 +60,16 @@ function deleteField(form) {
 let obj = {
     depth: function (req, res, next) {
 
+        let symbolName;
         let nonce = new Date().getTime();
 
         try {
-            var symbolName = symbol.carboneum[req.query.symbol].binance;
+            symbolName = symbol.carboneum[req.query.symbol].binance;
         } catch (e) {
             symbolName = req.query.symbol;
         }
 
-        var options = {
+        let options = {
             method: 'GET',
             url: 'https://api.binance.com/api/v1/depth',
             qs: {
@@ -109,6 +114,7 @@ let obj = {
 
     newOrder: async function (req, res, next) {
 
+        let symbolName;
         const key = await getvalue(req);
 
         if (key.hasOwnProperty('err')) {
@@ -116,7 +122,7 @@ let obj = {
         }
 
         try {
-            var symbolName = symbol.carboneum[req.body.symbol].binance;
+            symbolName = symbol.carboneum[req.body.symbol].binance;
         } catch (e) {
             symbolName = req.body.symbol;
         }
@@ -139,7 +145,7 @@ let obj = {
         deleteField(form);
         genSignature(form, key.secret_key);
 
-        var options = {
+        let options = {
             method: 'POST',
             url: 'https://api.binance.com/api/v3/order',
             headers:
@@ -203,8 +209,9 @@ let obj = {
 
     allOrder: async function (req, res, next) {
 
+        let symbolName;
         try {
-            var symbolName = symbol.carboneum[req.query.symbol].binance;
+            symbolName = symbol.carboneum[req.query.symbol].binance;
         } catch (e) {
             symbolName = req.query.symbol;
         }
@@ -217,7 +224,7 @@ let obj = {
         };
 
         genSignature(qs, key.secret_key);
-        var options = {
+        let options = {
             method: 'GET',
             url: 'https://api.binance.com/api/v3/allOrders',
             headers:
@@ -236,7 +243,9 @@ let obj = {
 
             console.log(body);
             for (let i in body) {
-                body[i].symbol = symbol.binance[body[i].symbol];
+                if (body.hasOwnProperty(i)) {
+                    body[i].symbol = symbol.binance[body[i].symbol];
+                }
             }
             if (response.statusCode !== 200) {
                 if (body.code === -1100) {
@@ -250,22 +259,24 @@ let obj = {
                 }
             }
             for (let i in body) {
-                arrBinance.push({
-                    "symbol": body[i].symbol,
-                    "orderId": body[i].orderId.toString(),
-                    "clientOrderId": body[i].clientOrderId,
-                    "price": body[i].price,
-                    "origQty": body[i].origQty,
-                    "executedQty": body[i].executedQty,
-                    "status": body[i].status,
-                    "timeInForce": body[i].timeInForce,
-                    "type": body[i].type,
-                    "side": body[i].side,
-                    "stopPrice": body[i].stopPrice,
-                    "icebergQty": body[i].icebergQty,
-                    "time": body[i].time,
-                    "isWorking": body[i].isWorking
-                });
+                if (body.hasOwnProperty(i)) {
+                    arrBinance.push({
+                        "symbol": body[i].symbol,
+                        "orderId": body[i].orderId.toString(),
+                        "clientOrderId": body[i].clientOrderId,
+                        "price": body[i].price,
+                        "origQty": body[i].origQty,
+                        "executedQty": body[i].executedQty,
+                        "status": body[i].status,
+                        "timeInForce": body[i].timeInForce,
+                        "type": body[i].type,
+                        "side": body[i].side,
+                        "stopPrice": body[i].stopPrice,
+                        "icebergQty": body[i].icebergQty,
+                        "time": body[i].time,
+                        "isWorking": body[i].isWorking
+                    });
+                }
             }
 
             console.log(body);
@@ -274,8 +285,9 @@ let obj = {
 
     },
     deleteOrder: async function (req, res, next) {
+        let symbolName;
         try {
-            var symbolName = symbol.carboneum[req.query.symbol].binance;
+            symbolName = symbol.carboneum[req.query.symbol].binance;
         } catch (e) {
             symbolName = req.query.symbol;
         }
@@ -287,7 +299,7 @@ let obj = {
         };
 
         genSignature(qs, key.secret_key);
-        var options = {
+        let options = {
             method: 'DELETE',
             url: 'https://api.binance.com/api/v3/order',
             headers:
@@ -321,7 +333,7 @@ let obj = {
             res.send({
                 "symbol": body.symbol,
                 "origClientOrderId": body.origClientOrderId,
-                "orderId": toString(body.orderId),
+                "orderId": `${body.orderId}`,
                 "clientOrderId": body.clientOrderId
             });
         });
@@ -334,7 +346,7 @@ let obj = {
         };
 
         genSignature(qs, key.secret_key);
-        var options = {
+        let options = {
             method: 'GET',
             url: 'https://api.binance.com/api/v3/account',
             headers:
