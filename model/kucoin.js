@@ -216,7 +216,7 @@ let obj = {
 
         const signature = genSignature({
             symbol: symbolName
-        }, '/v1/order/active', nonce, key.secret_key));
+        }, '/v1/order/active', nonce, key.secret_key);
 
         let toKucoin = [];
 
@@ -318,7 +318,7 @@ let obj = {
             symbol: symbolName,
             type: 'BUY',
             orderOid: req.query.orderId,
-        }, '/v1/order/detail', nonce, key.secret_key));
+        }, '/v1/order/detail', nonce, key.secret_key);
 
         var options = {
             method: 'GET',
@@ -365,7 +365,7 @@ let obj = {
                 type: orderType,
                 symbol: symbolName,
                 orderOid: req.query.orderId,
-            }, '/v1/cancel-order', nonce);
+            }, '/v1/cancel-order', nonce, key.secret_key);
 
             var options = {
                 method: 'POST',
@@ -375,7 +375,7 @@ let obj = {
                         'Cache-Control': 'no-cache',
                         'KC-API-SIGNATURE': signature,
                         'KC-API-NONCE': nonce,
-                        'KC-API-KEY': process.env.KC_API_KEY
+                        'KC-API-KEY': key.api_key
                     },
                 form: form,
                 json: true
@@ -416,7 +416,7 @@ let obj = {
             return next(key.err);
         }
 
-        const signature = genSignature({}, '/v1/account/balances', nonce, key.secret_key));
+        const signature = genSignature({}, '/v1/account/balances', nonce, key.secret_key);
 
         let accKc = {
             "makerCommission": null,

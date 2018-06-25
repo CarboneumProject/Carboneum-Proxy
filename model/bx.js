@@ -22,14 +22,14 @@ async function getvalue(req) {
     }
 }
 
-function genSignature(form) {
+function genSignature(form, secret_key) {
     let queryString = [];
 
     queryString.push(form.key + form.nonce);
     queryString = queryString.join('');
 
     console.log(queryString);
-    let signatureResult = CryptoJS.SHA256(queryString + process.env.BX_SECRET_KEY).toString(CryptoJS.enc.Hex);
+    let signatureResult = CryptoJS.SHA256(queryString + secret_key).toString(CryptoJS.enc.Hex);
     form.signature = signatureResult;
 }
 
