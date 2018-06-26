@@ -42,6 +42,7 @@ app.post('/sign-in', function (req, res) {
   if (addressFromSign.toLowerCase() === req.body.account.toLowerCase()) {
     res.send({ 'success': true });
     req.session.address = req.body.account;
+    req.session.sign = req.body.signed;
     req.session.save(err => {
         console.log(err);
     })

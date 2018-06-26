@@ -8,17 +8,16 @@ const symbol = require("./symbol");
 const ExchangeError = require("./exchangeerror");
 
 async function getvalue(req) {
-    let secret = await getval.get(req.session.address + ":" + req.query.exchange + ":SECRET_KEY");
-    if (secret === null) {
+    let secret_key = await getval.get(req.session.address + ":" + req.query.exchange + ":SECRET_KEY", req.session.sign);
+    if (secret_key === null) {
         return {err: new ExchangeError('Required Secret_key.', 7000)};
     }
 
-    let api_key = await getval.get(req.session.address + ":" + req.query.exchange + ":API_KEY");
+    let api_key = await getval.get(req.session.address + ":" + req.query.exchange + ":API_KEY", req.session.sign);
     if (api_key === null) {
         return {err: new ExchangeError('Required API_KEY.', 7001)};
     }
 
-    // noinspection JSUnresolvedVariable
     return {
         api_key: api_key,
         secret_key: secret_key
