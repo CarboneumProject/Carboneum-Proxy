@@ -1,37 +1,51 @@
 const request = require('supertest');
 const app = require('../app');
-var redis = require("redis"),
+const getval = require('../model/getval');
+const redis = require("redis"),
     client = redis.createClient();
 const {promisify} = require('util');
-const getAsync = promisify(client.get).bind(client);
 const setAsync = promisify(client.set).bind(client);
 
-test('GET value', async function (done) {
+let cookie;
+const sign = process.env.SIGNED;
+
+test('sign-in', async (done) => {
+    const res = await request(app)
+        .post('/sign-in/')
+        .send({
+            account: process.env.ACCOUNT,
+            signed: sign
+        });
+    console.log(res.text);
+    cookie = res.headers['set-cookie'];
+    console.log(cookie);
+    done();
+});
+
+test('set api key', async (done) => {
     //random api_key and secret_key
     let api_key = Math.random().toString();
     let secret_key = Math.random().toString();
 
-    let exchange = 'bx';
 
-    await setAsync(exchange + ":API_KEY", "");
-    await setAsync(exchange + ":SECRET_KEY", "");
+    await setAsync("5f65d5b06f6f6966b18aab75d09301aa5b71cbba6667ff944cce4b3a5a8267b0", "");
+    await setAsync("4405da96113c8b2b53b66ec6df8cadf0edca76243e3f5809d370ded5a90df20f", "");
+    console.log(cookie);
 
-    const sellResponse = await request(app)
+    await request(app)
         .post('/getval/')
-        .query({exchange: exchange})
+        .query({exchange: 'huobi'})
         .send({
-            'API_KEY': api_key,
-            'SECRET_KEY': secret_key,
+            API_KEY: api_key,
+            SECRET_KEY: secret_key
         })
-        .set('Accept', 'text/plain');
+        .set('cookie', cookie);
 
-    expect(sellResponse.text).toBe("Success to added");
-
-    let res = await getAsync(exchange + ":API_KEY");
+    let res = await getval.get(`${process.env.ACCOUNT}:huobi:API_KEY`, sign);
     expect(res).toBe(api_key);
     console.log(res);
 
-    res = await getAsync(exchange + ":SECRET_KEY");
+    res = await getval.get(`${process.env.ACCOUNT}:huobi:SECRET_KEY`, sign);
     expect(res).toBe(secret_key);
     console.log(res);
     done();

@@ -1,8 +1,6 @@
 const request = require("request");
-// noinspection SpellCheckingInspection
 const CryptoJS = require("crypto-js");
 const moment = require('moment');
-// noinspection SpellCheckingInspection
 const getval = require("./getval");
 
 const symbol = require("./symbol");
@@ -44,7 +42,7 @@ function genSignature(method, host_url, path, form, nonce, secret_key, api_key) 
     queryString = queryString.join('&');
 
     let payload = [method, host_url, path, queryString];
-    console.log(payload);
+
     payload = payload.join('\n');
     console.log(payload);
 
@@ -111,7 +109,7 @@ let obj = {
                     ]);
                 }
             }
-            console.log(body);
+
             res.send(depth);
         });
 
@@ -128,14 +126,13 @@ let obj = {
 
         let nonce = moment().toISOString().substring(0, 19);
 
-        console.log(req.body.side);
 
         if (req.body.side === 'sell' || req.body.side === 'SELL') {
             req.body.side = 'sell-limit'
         } else {
             req.body.side = 'buy-limit'
         }
-        console.log(req.body.side);
+
 
         try {
             symbolName = symbol.carboneum[req.body.symbol].huobi;
@@ -195,14 +192,14 @@ let obj = {
                 }
             }
 
-            console.log(req.body.side);
+
             if (req.body.side === 'sell-limit') {
                 req.body.side = req.body.side.substring(0, 4)
             } else {
                 req.body.side = req.body.side.substring(0, 3)
             }
 
-            console.log(req.body.side);
+
 
 
             res.send({
@@ -250,7 +247,7 @@ let obj = {
 
         let toHuobi = [];
 
-        console.log(signature);
+
 
         let form = {
             AccessKeyId: key.api_key,
@@ -310,7 +307,7 @@ let obj = {
                 }
             }
 
-            console.log(body);
+
             res.send(toHuobi);
         });
 
@@ -326,7 +323,7 @@ let obj = {
 
         let nonce = moment().toISOString().substring(0, 19);
 
-        console.log(req);
+
         let orderId = req.query.orderId;
 
         const signature = genSignature('POST', 'api.huobi.pro', `/v1/order/orders/${orderId}/submitcancel`, {
@@ -337,7 +334,6 @@ let obj = {
         }, encodeURIComponent(nonce), key.secret_key, key.api_key);
 
 
-        console.log(signature);
 
         let form = {
             AccessKeyId: key.api_key,
@@ -369,7 +365,6 @@ let obj = {
                 }
             }
 
-            console.log(body);
             res.send({
                 "symbol": null,
                 "origClientOrderId": null,
@@ -398,7 +393,6 @@ let obj = {
             AccessKeyId: key.api_key,
         }, encodeURIComponent(nonce), key.secret_key, key.api_key);
 
-        console.log(signature);
 
         let form = {
             AccessKeyId: key.api_key,
@@ -418,7 +412,6 @@ let obj = {
             "updateTime": Date.parse(nonce) / 1000,
             "balances": []
         };
-        console.log(accHb);
 
         let options = {
             method: 'GET',
@@ -432,8 +425,6 @@ let obj = {
                 //todo handle this error
                 return next(error);
             }
-
-            console.log(body);
 
             if (body.status === 'error') {
                 if (body['err-code'].substring(0, 23) === 'api-signature-not-valid') {
@@ -460,7 +451,7 @@ let obj = {
                     }
                 }
             }
-            console.log(body);
+
             res.send(accHb);
         });
 

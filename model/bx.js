@@ -1,7 +1,5 @@
 const request = require("request");
-// noinspection SpellCheckingInspection
 const CryptoJS = require("crypto-js");
-// noinspection SpellCheckingInspection
 const getval = require("./getval");
 
 const symbol = require("./symbol");
@@ -58,7 +56,6 @@ let obj = {
 
             body.lastUpdateId = nonce;
 
-            console.log(body);
             res.send(body);
         });
 
@@ -83,7 +80,7 @@ let obj = {
         };
 
         genSignature(form, key.secret_key);
-        console.log(form);
+
         let options = {
             method: 'POST',
             url: 'https://bx.in.th/api/order',
@@ -94,7 +91,6 @@ let obj = {
             form: form,
             json: true
         };
-        console.log(options);
 
         request(options, function (error, response, body) {
             if (error) {
@@ -102,7 +98,6 @@ let obj = {
                 return next(error);
             }
 
-            console.log(body);
             if (body.error !== null) {
                 if (body.error.substring(0, 32) === 'You must enter a valid price per') {
                     return next(new ExchangeError('Invalid Price.', 9001));
@@ -118,7 +113,7 @@ let obj = {
                     return next(new ExchangeError('An unknown error occured while processing the request.', 1000));
                 }
             }
-            console.log(body);
+
             res.send({
                 "symbol": req.body.symbol,
                 "orderId": body.order_id.toString(),
@@ -162,14 +157,13 @@ let obj = {
             form: form,
             json: true
         };
-        console.log(options);
+
         request(options, function (error, response, body) {
             if (error) {
                 //todo handle this error
                 return next(error);
             }
 
-            console.log(body);
             if (body.success === false) {
                 if (body.error.substring(0, 28) === 'You did not set any API key.') {
                     return next(new ExchangeError('Invalid Api-Key ID.', 2008));
@@ -206,7 +200,7 @@ let obj = {
                     });
                 }
             }
-            console.log(toBinance);
+
             res.send(toBinance);
         });
 
@@ -244,8 +238,6 @@ let obj = {
                 return next(error);
             }
 
-            console.log(body);
-
             if (body.error !== null) {
                 if (body.error.substring(0, 32) === 'Order not found') {
                     return next(new ExchangeError('Unknown order sent.', 2011));
@@ -254,7 +246,7 @@ let obj = {
                 }
             }
 
-            console.log(body);
+
             res.send({
                 "symbol": req.query.symbol,
                 "origClientOrderId": null,
@@ -308,7 +300,6 @@ let obj = {
                 return next(error);
             }
 
-            console.log(body);
 
             if (body.error === false) {
                 if (body.error.substring(0, 15) === 'Order not found') {
@@ -331,7 +322,7 @@ let obj = {
                 }
             }
 
-            console.log(accBx);
+
             res.send(accBx);
         });
 

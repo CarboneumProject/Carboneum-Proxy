@@ -1,7 +1,5 @@
 const request = require("request");
-// noinspection SpellCheckingInspection
 const CryptoJS = require("crypto-js");
-// noinspection SpellCheckingInspection
 const getval = require("./getval");
 
 const symbol = require("./symbol");
@@ -113,6 +111,7 @@ let obj = {
     newOrder: async function (req, res, next) {
 
         let symbolName;
+
         const key = await getvalue(req);
 
         if (key.hasOwnProperty('err')) {
@@ -190,7 +189,7 @@ let obj = {
 
             res.send({
                 "symbol": body.symbol,
-                "orderId": body.orderId.toString(),
+                "orderId": `${body.orderId}`,
                 "clientOrderId": body.clientOrderId,
                 "transactTime": body.transactTime,
                 "price": body.price,
@@ -208,6 +207,9 @@ let obj = {
     allOrder: async function (req, res, next) {
 
         let symbolName;
+
+        const key = await getvalue(req);
+
         try {
             symbolName = symbol.carboneum[req.query.symbol].binance;
         } catch (e) {
@@ -239,7 +241,6 @@ let obj = {
                 return next(error);
             }
 
-            console.log(body);
             for (let i in body) {
                 if (body.hasOwnProperty(i)) {
                     body[i].symbol = symbol.binance[body[i].symbol];
@@ -277,13 +278,15 @@ let obj = {
                 }
             }
 
-            console.log(body);
             res.send(arrBinance);
         });
 
     },
     deleteOrder: async function (req, res, next) {
         let symbolName;
+
+        const key = await getvalue(req);
+
         try {
             symbolName = symbol.carboneum[req.query.symbol].binance;
         } catch (e) {
@@ -308,7 +311,7 @@ let obj = {
             qs: qs,
             json: true
         };
-        console.log(options);
+
         request(options, function (error, response, body) {
             if (error) {
                 //todo handle this error
@@ -327,7 +330,6 @@ let obj = {
                 }
             }
 
-            console.log(body);
             res.send({
                 "symbol": body.symbol,
                 "origClientOrderId": body.origClientOrderId,
@@ -342,6 +344,8 @@ let obj = {
         let qs = {
             timestamp: req.query.timestamp + '000'
         };
+
+        const key = await getvalue(req);
 
         genSignature(qs, key.secret_key);
         let options = {
@@ -371,7 +375,6 @@ let obj = {
                 }
             }
 
-            console.log(body);
             res.send(body);
         });
 

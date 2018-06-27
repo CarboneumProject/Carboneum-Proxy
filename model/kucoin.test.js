@@ -1,6 +1,33 @@
 const request = require('supertest');
 const app = require('../app');
 
+let cookie;
+
+test('sign-in', async (done) => {
+    const res = await request(app)
+        .post('/sign-in/')
+        .send({
+            account: process.env.ACCOUNT,
+            signed: process.env.SIGNED
+        });
+    console.log(res.text);
+    cookie = res.headers['set-cookie'];
+    done();
+});
+
+test('set api key', async (done) => {
+    const res = await request(app)
+        .post('/getval/')
+        .query({exchange: 'kucoin'})
+        .send({
+            API_KEY: process.env.KC_API_KEY,
+            SECRET_KEY: process.env.KC_SECRET_KEY
+        })
+        .set('cookie', cookie);
+    console.log(res.text);
+    done();
+});
+
 test('kucoin depth', function (done) {
     request(app)
         .get('/depth/')
@@ -40,6 +67,7 @@ test('kucoin account', function (done) {
         .get('/account/')
         .query({exchange: 'kucoin', timestamp: Math.round(new Date().getTime() / 1000)})
         .set('Accept', 'application/json')
+        .set('cookie', cookie)
         .then(response => {
             expect(response.statusCode).toBe(200);
             expect(response.body).toHaveProperty('makerCommission');
@@ -83,6 +111,7 @@ test('kucoin allOrders', function (done) {
         .get('/allOrders/')
         .query({exchange: 'kucoin', symbol: symbol, timestamp: Math.round(new Date().getTime() / 1000)})
         .set('Accept', 'application/json')
+        .set('cookie', cookie)
         .then(response => {
             expect(response.statusCode).toBe(200);
             expect(Array.isArray(response.body)).toBe(true);
@@ -161,7 +190,8 @@ test('kucoin create and cancel order', async function (done) {
             symbol: symbol,
             timestamp: Math.round(new Date().getTime() / 1000),
         })
-        .set('Accept', 'application/json');
+        .set('Accept', 'application/json')
+        .set('cookie', cookie);
 
     expect(sellResponse.body).toHaveProperty('symbol');
     expect(typeof sellResponse.body.symbol).toBe('string');
@@ -216,7 +246,8 @@ test('kucoin create and cancel order', async function (done) {
             orderId: orderId,
             timestamp: Math.round(new Date().getTime() / 1000)
         })
-        .set('Accept', 'application/json');
+        .set('Accept', 'application/json')
+        .set('cookie', cookie);
 
     expect(cancelResponse.body).toHaveProperty('symbol');
     expect(typeof cancelResponse.body.symbol).toBe('string');

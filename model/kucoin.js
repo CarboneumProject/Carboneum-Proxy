@@ -1,7 +1,5 @@
 const request = require("request");
-// noinspection SpellCheckingInspection
 const CryptoJS = require("crypto-js");
-// noinspection SpellCheckingInspection
 const getval = require("./getval");
 
 
@@ -81,15 +79,13 @@ let obj = {
             },
             json: true
         };
-        console.log(options);
+
 
         request(options, function (error, response, body) {
             if (error) {
                 //todo handle this error
                 return next(error);
             }
-
-            console.log(body);
 
             if (body.success === false) {
                 if (body.msg.substring(0, 16) === 'SYMBOL NOT FOUND') {
@@ -133,7 +129,7 @@ let obj = {
                     }
                 }
             }
-            console.log(body);
+
             res.send(depthKc);
         });
 
@@ -201,7 +197,6 @@ let obj = {
                 }
             }
 
-            console.log(body);
             res.send({
                 "symbol": req.body.symbol,
                 "orderId": body.data.orderOid,
@@ -323,7 +318,6 @@ let obj = {
                 }
             }
 
-            console.log(body);
             res.send(toKucoin);
         });
 
@@ -429,7 +423,7 @@ let obj = {
                         return next(new ExchangeError('An unknown error occured while processing the request.', 1000));
                     }
                 }
-                console.log(body);
+
                 res.send({
                     "symbol": req.query.symbol,
                     "origClientOrderId": null,
@@ -476,15 +470,12 @@ let obj = {
                 },
             json: true
         };
-        console.log(options);
 
         request(options, function (error, response, body) {
             if (error) {
                 //todo handle this error
                 return next(error);
             }
-
-            console.log(body);
 
             if (body.success === false) {
                 if (body.msg.substring(0, 29) === 'Signature verification failed') {
@@ -509,7 +500,6 @@ let obj = {
                 }
             }
 
-            console.log(body);
             res.send(accKc);
         });
 
