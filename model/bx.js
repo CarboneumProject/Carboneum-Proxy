@@ -351,7 +351,6 @@ let obj = {
             }
 
             if (body && body.trades) {
-                body.lastUpdateId = nonce;
                 let data = body.trades[body.trades.length - 1];
                 let eventTime = moment().unix();
 
