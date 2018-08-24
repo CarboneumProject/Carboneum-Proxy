@@ -378,6 +378,44 @@ let obj = {
             res.send(body);
         });
 
+    },
+
+    ticker: function (req, res, next) {
+
+        let symbolName;
+
+        try {
+            symbolName = symbol.carboneum[req.query.symbol].binance;
+        } catch (e) {
+            symbolName = req.query.symbol;
+        }
+
+        let options = {
+            method: 'GET',
+            url: 'https://api.binance.com/api/v1/ticker/24hr',
+            qs: {
+                symbol: symbolName
+            },
+            headers:
+                {
+                    'Cache-Control': 'no-cache'
+                },
+            json: true
+        };
+
+        request(options, function (error, response, body) {
+            if (error) {
+                //todo handle this error
+                return next(error);
+            }
+            res.send({
+                "eventTime": body.closeTime,     // Event time
+                "symbol": body.symbol,      // Symbol
+                "price": body.lastPrice     // Open price
+            });
+
+        });
+
     }
 
 };

@@ -4,6 +4,8 @@ const getval = require("./getval");
 
 const symbol = require("./symbol");
 const ExchangeError = require("./exchangeerror");
+const moment = require('moment');
+
 
 async function getvalue(req) {
     let secret_key = await getval.get(req.session.address + ":" + req.query.exchange + ":SECRET_KEY", req.session.sign);
@@ -324,6 +326,52 @@ let obj = {
 
 
             res.send(accBx);
+        });
+
+    },
+
+    ticker: function (req, res) {
+
+        let options = {
+            method: 'GET',
+            url: 'https://bx.in.th/api/trade/',
+            qs: {
+                pairing: symbol.carboneum[req.query.symbol].bx
+            },
+            headers:
+                {
+                    'Cache-Control': 'no-cache'
+                },
+            json: true
+        };
+        request(options, function (error, response, body) {
+            if (error) {
+                //todo handle this error
+                return next(error);
+            }
+
+            if (body && body.trades) {
+                body.lastUpdateId = nonce;
+                let data = body.trades[body.trades.length - 1];
+                let eventTime = moment().unix();
+
+                let buyId = null;
+                let sellId = null;
+                if (data.trade_type === 'buy') {
+                    buyId = data.order_id;
+                } else if (data.trade_type === 'sell') {
+                    sellId = data.order_id;
+                }
+
+
+                res.send({
+                    "eventTime": eventTime,     // Event time
+                    "symbol": req.query.symbol,      // Symbol
+                    "price": data.rate      // Open price
+                });
+            } else {
+                res.send(null)
+            }
         });
 
     }

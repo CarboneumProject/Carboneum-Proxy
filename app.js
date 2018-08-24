@@ -15,6 +15,7 @@ const newOrderRouter = require('./routes/order');
 const allOrderRouter = require('./routes/allorder');
 const accountRouter = require('./routes/account');
 const getvalRouter = require('./routes/getval');
+const tickerRouter = require('./routes/ticker');
 
 const app = express();
 app.use(logger('dev'));
@@ -36,6 +37,7 @@ app.use('/order', newOrderRouter);
 app.use('/allOrders', allOrderRouter);
 app.use('/account', accountRouter);
 app.use('/getval', getvalRouter);
+app.use('/ticker', tickerRouter);
 app.post('/sign-in', function (req, res) {
   const addressFromSign = validateSignature(req.body.signed);
   // noinspection JSUnresolvedFunction

@@ -503,6 +503,41 @@ let obj = {
             res.send(accKc);
         });
 
+    },
+
+    ticker: function (req, res, next) {
+
+        let symbolName;
+
+        try {
+            symbolName = symbol.carboneum[req.query.symbol].kucoin;
+        } catch (e) {
+            symbolName = req.query.symbol;
+        }
+
+        let options = {
+            method: 'GET',
+            url: 'https://api.kucoin.com/v1/open/tick',
+            qs: {
+                symbol: symbolName
+            },
+            json: true
+        };
+
+
+        request(options, function (error, response, body) {
+            if (error) {
+                //todo handle this error
+                return next(error);
+            }
+
+            res.send({
+                "eventTime": body.timestamp,     // Event time
+                "symbol": symbolName,      // Symbol
+                "price": body.data.lastDealPrice     // Open price
+            });
+        });
+
     }
 
 };

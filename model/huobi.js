@@ -54,19 +54,12 @@ let obj = {
     depth: function (req, res, next) {
 
         let symbolName;
-        let nonce = new Date().getTime();
 
         try {
             symbolName = symbol.carboneum[req.query.symbol].huobi;
         } catch (e) {
             symbolName = req.query.symbol;
         }
-
-        let depth = {
-            "lastUpdateId": nonce,
-            "bids": [],
-            "asks": []
-        };
 
         let options = {
             method: 'GET',
@@ -91,6 +84,13 @@ let obj = {
                     return next(new ExchangeError('An unknown error occured while processing the request.', 1000));
                 }
             }
+
+            let depth = {
+                "lastUpdateId": body.ts,
+                "symbol": symbolName,
+                "bids": [],
+                "asks": []
+            };
 
             for (let i in body.tick.bids) {
                 if (body.tick.bids.hasOwnProperty(i)) {
@@ -455,7 +455,41 @@ let obj = {
             res.send(accHb);
         });
 
-    }
+    },
+
+    ticker: function (req, res, next) {
+
+        let symbolName;
+
+        try {
+            symbolName = symbol.carboneum[req.query.symbol].huobi;
+        } catch (e) {
+            symbolName = req.query.symbol;
+        }
+
+        let options = {
+            method: 'GET',
+            url: 'https://api.huobi.pro/market/detail',
+            qs: {
+                symbol: symbolName,
+            },
+            json: true
+        };
+
+        request(options, function (error, response, body) {
+            if (error) {
+                //todo handle this error
+                return next(error);
+            }
+
+            res.send({
+                "eventTime": body.ts,     // Event time
+                "symbol": symbolName,      // Symbol
+                "price": body.tick.close     // Open price
+            });
+        });
+
+    },
 
 };
 
