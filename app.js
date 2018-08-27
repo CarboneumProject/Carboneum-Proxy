@@ -15,6 +15,7 @@ const allOrderRouter = require('./routes/allorder');
 const accountRouter = require('./routes/account');
 const getvalRouter = require('./routes/getval');
 const tickerRouter = require('./routes/ticker');
+const symbolRouter = require('./routes/symbol');
 
 const app = express();
 app.use(logger('dev'));
@@ -31,6 +32,7 @@ app.use(session({
 //path//
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/symbol', symbolRouter);
 app.use('/depth', depthRouter);
 app.use('/order', newOrderRouter);
 app.use('/allOrders', allOrderRouter);
@@ -55,7 +57,7 @@ app.post('/sign-in', function (req, res) {
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-    res.error({
+    res.status(404).send({
         code: 404,
         title: 'That resource was not found',
         description: ''
