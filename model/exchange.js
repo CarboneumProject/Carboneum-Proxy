@@ -8,9 +8,6 @@ const exchange = {
     bx: bx,
     kucoin: kucoin,
     huobi: huobi,
-    new: function (obj) {
-        obj(this);
-    }
 };
 
 console.log('exchange model created');

@@ -1,11 +1,11 @@
-const request = require("request");
+const request = require("request-promise-native");
 const CryptoJS = require("crypto-js");
 const getval = require("./getval");
 
 const symbol = require("./symbol");
-const ExchangeError = require("./exchangeerror");
+const ExchangeError = require("./exchangeError");
 
-async function getvalue(req) {
+async function getValue(req) {
     let secret_key = await getval.get(req.session.address + ":" + req.query.exchange + ":SECRET_KEY", req.session.sign);
     if (secret_key === null) {
         return {err: new ExchangeError('Required Secret_key.', 7000)};
@@ -112,7 +112,7 @@ let obj = {
 
         let symbolName;
 
-        const key = await getvalue(req);
+        const key = await getValue(req);
 
         if (key.hasOwnProperty('err')) {
             return next(key.err);
@@ -208,7 +208,7 @@ let obj = {
 
         let symbolName;
 
-        const key = await getvalue(req);
+        const key = await getValue(req);
 
         try {
             symbolName = symbol.carboneum[req.query.symbol].binance;
@@ -285,7 +285,7 @@ let obj = {
     deleteOrder: async function (req, res, next) {
         let symbolName;
 
-        const key = await getvalue(req);
+        const key = await getValue(req);
 
         try {
             symbolName = symbol.carboneum[req.query.symbol].binance;
@@ -345,7 +345,7 @@ let obj = {
             timestamp: req.query.timestamp + '000'
         };
 
-        const key = await getvalue(req);
+        const key = await getValue(req);
 
         genSignature(qs, key.secret_key);
         let options = {
@@ -380,8 +380,7 @@ let obj = {
 
     },
 
-    ticker: function (req, res, next) {
-
+    ticker: async function (req, res, next) {
         let symbolName;
 
         try {
@@ -392,7 +391,7 @@ let obj = {
 
         let options = {
             method: 'GET',
-            url: 'https://api.binance.com/api/v1/ticker/24hr',
+            url: 'https://api.binance.com/api/v3/ticker/price',
             qs: {
                 symbol: symbolName
             },
@@ -403,19 +402,16 @@ let obj = {
             json: true
         };
 
-        request(options, function (error, response, body) {
-            if (error) {
-                //todo handle this error
-                return next(error);
-            }
-            res.send({
-                "eventTime": body.closeTime,     // Event time
-                "symbol": body.symbol,      // Symbol
-                "price": body.lastPrice     // Open price
-            });
+        try {
+            const body = await request(options);
 
-        });
-
+            return {
+                exchange: 'binance',
+                price: body.price
+            };
+        } catch (e) {
+            next(e);
+        }
     }
 
 };

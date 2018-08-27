@@ -5,7 +5,7 @@ const getval = require("../model/getval");
 const exchange = require("../model/exchange");
 
 
-const ExchangeError = require("../model/exchangeerror");
+const ExchangeError = require("../model/exchangeError");
 
 router.post('/', function(req, res, next) {
     if (exchange[req.query.exchange]) {
