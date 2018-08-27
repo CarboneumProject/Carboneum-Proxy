@@ -1,10 +1,10 @@
-const request = require("request");
+const request = require("request-promise-native");
 const CryptoJS = require("crypto-js");
 const getval = require("./getval");
 
 
 const symbol = require("./symbol");
-const ExchangeError = require("./exchangeerror");
+const ExchangeError = require("./exchangeError");
 
 
 async function getvalue(req) {
@@ -505,12 +505,15 @@ let obj = {
 
     },
 
-    ticker: function (req, res, next) {
-
+    ticker: async function (req, res, next) {
         let symbolName;
 
         try {
             symbolName = symbol.carboneum[req.query.symbol].kucoin;
+
+            if (symbolName === undefined) {
+                symbolName = req.query.symbol;
+            }
         } catch (e) {
             symbolName = req.query.symbol;
         }
@@ -524,22 +527,18 @@ let obj = {
             json: true
         };
 
+        try {
+            const body = await request(options);
 
-        request(options, function (error, response, body) {
-            if (error) {
-                //todo handle this error
-                return next(error);
-            }
-
-            res.send({
-                "eventTime": body.timestamp,     // Event time
-                "symbol": symbolName,      // Symbol
-                "price": body.data.lastDealPrice     // Open price
-            });
-        });
-
+            // noinspection JSUnresolvedVariable
+            return {
+                exchange: 'kucoin',
+                price: body.data.lastDealPrice.toString()     // Open price
+            };
+        } catch (e) {
+            return next(e);
+        }
     }
-
 };
 
 module.exports = obj;

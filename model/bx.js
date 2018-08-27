@@ -1,13 +1,13 @@
-const request = require("request");
+const request = require("request-promise-native");
 const CryptoJS = require("crypto-js");
 const getval = require("./getval");
 
 const symbol = require("./symbol");
-const ExchangeError = require("./exchangeerror");
+const ExchangeError = require("./exchangeError");
 const moment = require('moment');
 
 
-async function getvalue(req) {
+async function getValue(req) {
     let secret_key = await getval.get(req.session.address + ":" + req.query.exchange + ":SECRET_KEY", req.session.sign);
     if (secret_key === null) {
         return {err: new ExchangeError('Required Secret_key.', 7000)};
@@ -65,7 +65,7 @@ let obj = {
 
     newOrder: async function (req, res, next) {
 
-        const key = await getvalue(req);
+        const key = await getValue(req);
 
         if (key.hasOwnProperty('err')) {
             return next(key.err);
@@ -134,7 +134,7 @@ let obj = {
     },
     allOrder: async function (req, res, next) {
 
-        const key = await getvalue(req);
+        const key = await getValue(req);
 
         if (key.hasOwnProperty('err')) {
             return next(key.err);
@@ -209,7 +209,7 @@ let obj = {
     },
     deleteOrder: async function (req, res, next) {
 
-        const key = await getvalue(req);
+        const key = await getValue(req);
 
         if (key.hasOwnProperty('err')) {
             return next(key.err);
@@ -260,7 +260,7 @@ let obj = {
     },
     account: async function (req, res, next) {
 
-        const key = await getvalue(req);
+        const key = await getValue(req);
 
         if (key.hasOwnProperty('err')) {
             return next(key.err);
@@ -302,7 +302,6 @@ let obj = {
                 return next(error);
             }
 
-
             if (body.error === false) {
                 if (body.error.substring(0, 15) === 'Order not found') {
                     return next(new ExchangeError('Mandatory parameter was not sent, was empty/null, or malformed.', 1102));
@@ -324,14 +323,12 @@ let obj = {
                 }
             }
 
-
             res.send(accBx);
         });
 
     },
 
-    ticker: function (req, res) {
-
+    ticker: async function (req, res, next) {
         let options = {
             method: 'GET',
             url: 'https://bx.in.th/api/trade/',
@@ -344,35 +341,23 @@ let obj = {
                 },
             json: true
         };
-        request(options, function (error, response, body) {
-            if (error) {
-                //todo handle this error
-                return next(error);
-            }
+
+        try {
+            const body = await request(options);
 
             if (body && body.trades) {
                 let data = body.trades[body.trades.length - 1];
-                let eventTime = moment().unix();
 
-                let buyId = null;
-                let sellId = null;
-                if (data.trade_type === 'buy') {
-                    buyId = data.order_id;
-                } else if (data.trade_type === 'sell') {
-                    sellId = data.order_id;
-                }
-
-
-                res.send({
-                    "eventTime": eventTime,     // Event time
-                    "symbol": req.query.symbol,      // Symbol
-                    "price": data.rate      // Open price
-                });
+                return {
+                    exchange: 'bx',
+                    price: data.rate
+                };
             } else {
-                res.send(null)
+                next(new ExchangeError('An unknown error occured while processing the request.', 1000));
             }
-        });
-
+        } catch (e) {
+            next(e);
+        }
     }
 
 };
