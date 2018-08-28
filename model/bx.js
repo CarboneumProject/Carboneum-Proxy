@@ -345,7 +345,8 @@ let obj = {
         try {
             const body = await request(options);
 
-            if (body && body.trades) {
+            // noinspection JSUnresolvedVariable
+          if (body && body.trades) {
                 let data = body.trades[body.trades.length - 1];
 
                 return {
