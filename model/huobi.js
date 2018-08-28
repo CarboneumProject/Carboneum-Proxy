@@ -1,12 +1,12 @@
-const request = require("request");
+const request = require("request-promise-native");
 const CryptoJS = require("crypto-js");
 const moment = require('moment');
 const getval = require("./getval");
 
 const symbol = require("./symbol");
-const ExchangeError = require("./exchangeerror");
+const ExchangeError = require("./exchangeError");
 
-async function getvalue(req) {
+async function getValue(req) {
     let secret_key = await getval.get(req.session.address + ":" + req.query.exchange + ":SECRET_KEY", req.session.sign);
     if (secret_key === null) {
         return {err: new ExchangeError('Required Secret_key.', 7000)};
@@ -118,7 +118,7 @@ let obj = {
     newOrder: async function (req, res, next) {
 
         let symbolName;
-        const key = await getvalue(req);
+        const key = await getValue(req);
 
         if (key.hasOwnProperty('err')) {
             return next(key.err);
@@ -200,8 +200,6 @@ let obj = {
             }
 
 
-
-
             res.send({
                 "symbol": req.body.symbol,
                 "orderId": body.data.toString(),
@@ -222,7 +220,7 @@ let obj = {
     allOrder: async function (req, res, next) {
 
         let symbolName;
-        const key = await getvalue(req);
+        const key = await getValue(req);
 
         if (key.hasOwnProperty('err')) {
             return next(key.err);
@@ -246,7 +244,6 @@ let obj = {
         }, encodeURIComponent(nonce), key.secret_key, key.api_key);
 
         let toHuobi = [];
-
 
 
         let form = {
@@ -315,7 +312,7 @@ let obj = {
 
     deleteOrder: async function (req, res, next) {
 
-        const key = await getvalue(req);
+        const key = await getValue(req);
 
         if (key.hasOwnProperty('err')) {
             return next(key.err);
@@ -332,7 +329,6 @@ let obj = {
             SignatureVersion: '2',
             AccessKeyId: key.api_key,
         }, encodeURIComponent(nonce), key.secret_key, key.api_key);
-
 
 
         let form = {
@@ -377,7 +373,7 @@ let obj = {
 
     account: async function (req, res, next) {
 
-        const key = await getvalue(req);
+        const key = await getValue(req);
 
         if (key.hasOwnProperty('err')) {
             return next(key.err);
@@ -457,8 +453,7 @@ let obj = {
 
     },
 
-    ticker: function (req, res, next) {
-
+    ticker: async function (req, res, next) {
         let symbolName;
 
         try {
@@ -476,19 +471,16 @@ let obj = {
             json: true
         };
 
-        request(options, function (error, response, body) {
-            if (error) {
-                //todo handle this error
-                return next(error);
-            }
+        try {
+            const body = await request(options);
 
-            res.send({
-                "eventTime": body.ts,     // Event time
-                "symbol": symbolName,      // Symbol
-                "price": body.tick.close     // Open price
-            });
-        });
-
+            return {
+                exchange: 'huobi',
+                price: body.tick.close.toString()    // Open price
+            };
+        } catch (e) {
+            next(e);
+        }
     },
 
 };

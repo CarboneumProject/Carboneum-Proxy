@@ -1,4 +1,3 @@
-const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -16,22 +15,24 @@ const allOrderRouter = require('./routes/allorder');
 const accountRouter = require('./routes/account');
 const getvalRouter = require('./routes/getval');
 const tickerRouter = require('./routes/ticker');
+const symbolRouter = require('./routes/symbol');
 
 const app = express();
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 // app.set('trust proxy', 1); // trust first proxy
 app.use(session({
-    secret: 'keyboard cat',
-    cookie: { secure: false }
+  secret: 'e53fff9376c3fcee6c2009efaf5c06d1',
+  cookie: {secure: false}
 }));
 
 //path//
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/symbol', symbolRouter);
 app.use('/depth', depthRouter);
 app.use('/order', newOrderRouter);
 app.use('/allOrders', allOrderRouter);
@@ -42,35 +43,31 @@ app.post('/sign-in', function (req, res) {
   const addressFromSign = validateSignature(req.body.signed);
   // noinspection JSUnresolvedFunction
   if (addressFromSign.toLowerCase() === req.body.account.toLowerCase()) {
-    res.send({ 'success': true });
+    res.send({'success': true});
     req.session.address = req.body.account;
     req.session.sign = req.body.signed;
     req.session.save(err => {
-        console.log(err);
+      console.log(err);
     })
   } else {
-    res.send({ 'success': false });
+    res.send({'success': false});
   }
 });
 
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  next(createError(404));
+  res.status(404).send({
+    code: 404,
+    title: 'That resource was not found',
+    description: ''
+  });
 });
 
 // error handler
-app.use(function (err, req, res) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.send({
-    code: err.code,
-    msg: err.message
-  });
+app.use(function (err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).send(err);
 });
 
 module.exports = app;
