@@ -453,15 +453,7 @@ let obj = {
 
     },
 
-    ticker: async function (req, res, next) {
-        let symbolName;
-
-        try {
-            symbolName = symbol.carboneum[req.query.symbol].huobi;
-        } catch (e) {
-            symbolName = req.query.symbol;
-        }
-
+    ticker: async function (symbolName, next) {
         let options = {
             method: 'GET',
             url: 'https://api.huobi.pro/market/detail',

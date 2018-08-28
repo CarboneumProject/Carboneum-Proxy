@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const validateSignature = require('./model/validate-signature.js');
+const validateSignature = require('./model/validate-signature');
 const session = require('express-session');
 
 const indexRouter = require('./routes/index');

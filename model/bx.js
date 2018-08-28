@@ -2,9 +2,7 @@ const request = require("request-promise-native");
 const CryptoJS = require("crypto-js");
 const getval = require("./getval");
 
-const symbol = require("./symbol");
 const ExchangeError = require("./exchangeError");
-const moment = require('moment');
 
 
 async function getValue(req) {
@@ -35,7 +33,7 @@ function genSignature(form, secret_key) {
 }
 
 let obj = {
-    depth: function (req, res) {
+    depth: function (req, res, next) {
 
         let nonce = new Date().getTime();
         let options = {
@@ -328,12 +326,12 @@ let obj = {
 
     },
 
-    ticker: async function (req, res, next) {
+    ticker: async function (symbolName, next) {
         let options = {
             method: 'GET',
             url: 'https://bx.in.th/api/trade/',
             qs: {
-                pairing: symbol.carboneum[req.query.symbol].bx
+                pairing: symbolName
             },
             headers:
                 {

@@ -505,19 +505,7 @@ let obj = {
 
     },
 
-    ticker: async function (req, res, next) {
-        let symbolName;
-
-        try {
-            symbolName = symbol.carboneum[req.query.symbol].kucoin;
-
-            if (symbolName === undefined) {
-                symbolName = req.query.symbol;
-            }
-        } catch (e) {
-            symbolName = req.query.symbol;
-        }
-
+    ticker: async function (symbolName, next) {
         let options = {
             method: 'GET',
             url: 'https://api.kucoin.com/v1/open/tick',
