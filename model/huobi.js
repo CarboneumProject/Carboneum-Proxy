@@ -105,6 +105,7 @@ let obj = {
   },
 
   newOrder: async function (req, res, next) {
+    const symbol = await require('../model/symbol');
 
     let symbolName;
     const key = await getValue(req);
@@ -207,6 +208,7 @@ let obj = {
   },
 
   allOrder: async function (req, res, next) {
+    const symbol = await require('../model/symbol');
 
     let symbolName;
     const key = await getValue(req);
