@@ -33,14 +33,12 @@ function genSignature(form, secret_key) {
 }
 
 let obj = {
-    depth: function (req, res, next) {
-
-        let nonce = new Date().getTime();
+    depth: async (symbolName, next) => {
         let options = {
             method: 'GET',
             url: 'https://bx.in.th/api/orderbook/',
             qs: {
-                pairing: symbol.carboneum[req.query.symbol].bx
+                pairing: symbolName
             },
             headers:
                 {
@@ -48,17 +46,14 @@ let obj = {
                 },
             json: true
         };
-        request(options, function (error, response, body) {
-            if (error) {
-                //todo handle this error
-                return next(error);
-            }
 
-            body.lastUpdateId = nonce;
-
-            res.send(body);
-        });
-
+        try {
+          const body = await request(options);
+          body.lastUpdateId = new Date().getTime();
+          return body;
+        } catch (e) {
+          next(e);
+        }
     },
 
     newOrder: async function (req, res, next) {

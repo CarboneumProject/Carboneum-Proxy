@@ -1,5 +1,11 @@
 const request = require('supertest');
 const app = require('../app');
+const redis = require('../model/redis');
+
+afterAll(async (done) => {
+  await redis.end(false);
+  done();
+});
 
 test('binance depth', function (done) {
   request(app)
@@ -49,7 +55,6 @@ test('bx depth', function (done) {
 
       for (let i = 0; i < depth['asks'].length; i++) {
         for (let j = 0; j < 2; j++) {
-          console.log(i, j);
           expect(typeof depth['asks'][i][j]).toBe('string');
           expect(typeof depth['asks'][i][j]).toBe('string');
           expect(typeof parseFloat(depth['asks'][i][j])).toBe('number');
@@ -58,7 +63,6 @@ test('bx depth', function (done) {
       }
       for (let i = 0; i < depth['bids'].length; i++) {
         for (let j = 0; j < 2; j++) {
-          console.log(i, j);
           expect(typeof depth['bids'][i][j]).toBe('string');
           expect(typeof depth['bids'][i][j]).toBe('string');
           expect(typeof parseFloat(depth['bids'][i][j])).toBe('number');
