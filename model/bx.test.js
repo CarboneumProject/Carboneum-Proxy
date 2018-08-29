@@ -1,17 +1,34 @@
 const request = require('supertest');
 const app = require('../app');
+const redis = require('../model/redis');
+
+afterAll(async (done) => {
+  await redis.end(false);
+  done();
+});
 
 let cookie;
 
-test('sign-in', async (done) => {
+beforeAll(async (done) => {
   const res = await request(app)
     .post('/sign-in/')
     .send({
       account: process.env.ACCOUNT,
       signed: process.env.SIGNED
     });
-  console.log(res.text);
   cookie = res.headers['set-cookie'];
+  done();
+});
+
+test('sign-in', async (done) => {
+  const res = await request(app)
+    .post('/sign-in/')
+    .set('Accept', 'application/json')
+    .send({
+      account: process.env.ACCOUNT,
+      signed: process.env.SIGNED
+    });
+  expect(res.body).toEqual({"success": true});
   done();
 });
 
@@ -24,7 +41,6 @@ test('set api key', async (done) => {
       SECRET_KEY: process.env.BX_SECRET_KEY
     })
     .set('cookie', cookie);
-  console.log(res.text);
   done();
 });
 
@@ -44,7 +60,6 @@ test('bx depth', function (done) {
 
       for (let i = 0; i < depth['asks'].length; i++) {
         for (let j = 0; j < 2; j++) {
-          console.log(i, j);
           expect(typeof depth['asks'][i][j]).toBe('string');
           expect(typeof depth['asks'][i][j]).toBe('string');
           expect(typeof parseFloat(depth['asks'][i][j])).toBe('number');
@@ -53,7 +68,6 @@ test('bx depth', function (done) {
       }
       for (let i = 0; i < depth['bids'].length; i++) {
         for (let j = 0; j < 2; j++) {
-          console.log(i, j);
           expect(typeof depth['bids'][i][j]).toBe('string');
           expect(typeof depth['bids'][i][j]).toBe('string');
           expect(typeof parseFloat(depth['bids'][i][j])).toBe('number');

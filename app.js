@@ -28,7 +28,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
   secret: 'e53fff9376c3fcee6c2009efaf5c06d1',
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
   cookie: {secure: false}
 }));
 
@@ -50,7 +50,7 @@ app.post('/sign-in', function (req, res) {
     req.session.address = req.body.account;
     req.session.sign = req.body.signed;
     req.session.save(err => {
-      console.log(err);
+      if (err) console.log(err);
     });
     req.session.touch();
   } else {
