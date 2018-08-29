@@ -124,6 +124,7 @@ let obj = {
   },
 
   newOrder: async function (req, res, next) {
+    const symbol = await require('../model/symbol');
 
     let symbolName;
     let nonce = new Date().getTime();
@@ -203,6 +204,7 @@ let obj = {
   },
 
   allOrder: async function (req, res, next) {
+    const symbol = await require('../model/symbol');
 
     let symbolName;
     let nonce = new Date().getTime();
@@ -312,6 +314,7 @@ let obj = {
   },
 
   deleteOrder: async function (req, res, next) {
+    const symbol = await require('../model/symbol');
 
     let symbolName;
     let nonce = new Date().getTime();
