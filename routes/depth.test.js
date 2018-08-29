@@ -132,6 +132,7 @@ test('kucoin depth', function (done) {
           expect(typeof parseFloat(depth['asks'][i][j])).toBe('number');
         }
       }
+
       for (let i = 0; i < depth['bids'].length; i++) {
         for (let j = 0; j < 2; j++) {
           expect(typeof depth['bids'][i][j]).toBe('string');
@@ -140,6 +141,7 @@ test('kucoin depth', function (done) {
           expect(typeof parseFloat(depth['bids'][i][j])).toBe('number');
         }
       }
+
       done();
     });
 });
