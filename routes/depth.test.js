@@ -79,7 +79,6 @@ test('huobi depth', function (done) {
     .get('/depth/')
     .query({exchange: 'huobi', symbol: 'ETH/BTC', timestamp: Math.round(new Date().getTime() / 1000)})
     .set('Accept', 'application/json')
-    .set('cookie', cookie)
     .then(response => {
       const depth = response.body;
       expect(depth).toHaveProperty('bids');
