@@ -1,5 +1,11 @@
 const request = require('supertest');
 const app = require('../app');
+const redis = require('../model/redis');
+
+afterAll(async (done) => {
+  await redis.end(false);
+  done();
+});
 
 test('/ticker/compare ETH/BTC', async (done) => {
   const response = await request(app)
