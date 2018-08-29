@@ -30,8 +30,6 @@ function genSignature(form, secret_key) {
       if (form.hasOwnProperty(key)) {
         if (key !== 'timestamp' && key !== 'signature') {
           queryString.push(key + '=' + form[key]);
-          console.log(key);
-          console.log(form[key]);
         }
       }
     }
@@ -40,7 +38,6 @@ function genSignature(form, secret_key) {
   queryString.push('timestamp=' + form.timestamp);
   queryString = queryString.join('&');
 
-  console.log(queryString);
   form.signature = CryptoJS.HmacSHA256(queryString, secret_key).toString(CryptoJS.enc.Hex);
 }
 
@@ -105,6 +102,7 @@ let obj = {
   },
 
   newOrder: async function (req, res, next) {
+    const symbol = await require('../model/symbol');
 
     let symbolName;
 
@@ -150,6 +148,8 @@ let obj = {
       form: form,
       json: true
     };
+
+    console.log(form);
 
     request(options, function (error, response, body) {
       if (error) {
@@ -201,6 +201,7 @@ let obj = {
   },
 
   allOrder: async function (req, res, next) {
+    const symbol = await require('../model/symbol');
 
     let symbolName;
 
@@ -279,6 +280,8 @@ let obj = {
 
   },
   deleteOrder: async function (req, res, next) {
+    const symbol = await require('../model/symbol');
+
     let symbolName;
 
     const key = await getValue(req);
