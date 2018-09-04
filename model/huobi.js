@@ -3,7 +3,6 @@ const CryptoJS = require("crypto-js");
 const moment = require('moment');
 const getval = require("./getval");
 
-const symbol = require("./symbol");
 const ExchangeError = require("./exchangeError");
 
 async function getValue(req) {

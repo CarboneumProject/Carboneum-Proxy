@@ -1,9 +1,7 @@
 const request = require("request-promise-native");
 const CryptoJS = require("crypto-js");
+
 const getval = require("./getval");
-
-
-const symbol = require("./symbol");
 const ExchangeError = require("./exchangeError");
 
 
@@ -33,8 +31,6 @@ function genSignature(form, path, nonce, secret_key) {
       if (form.hasOwnProperty(key)) {
         if (key !== 'timestamp' && key !== 'signature') {
           queryString.push(key + '=' + form[key]);
-          console.log(key);
-          console.log(form[key]);
         }
       }
     }

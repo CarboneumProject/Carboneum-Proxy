@@ -2,7 +2,6 @@ const request = require("request-promise-native");
 const CryptoJS = require("crypto-js");
 const getval = require("./getval");
 
-const symbol = require("./symbol");
 const ExchangeError = require("./exchangeError");
 
 async function getValue(req) {
