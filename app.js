@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV === 'production') {
+  require('@google-cloud/trace-agent').start();
+}
+
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
