@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
+    "deploy": "gcloud app deploy",
     "test": "jest"
   },
   "dependencies": {
+    "@google-cloud/trace-agent": "^3.1.1",
     "babel-core": "^6.26.3",
     "cookie-parser": "~1.4.3",
     "crypto-js": "^3.1.9-1",
