@@ -465,6 +465,83 @@ let obj = {
     }
   },
 
+  klines: async (symbolName, interval, startTime, endTime, limit, next) => {
+    let qs = {
+      symbol: symbolName,
+      period: interval.replace('m', 'min'),
+      size: limit,
+    };
+
+    for (let q in qs) {
+      if (qs.hasOwnProperty(q)) {
+        if (qs[q] === undefined) {
+          delete qs[q]
+        }
+      }
+    }
+
+    const options = {
+      method: 'GET',
+      url: 'https://api.huobi.pro/market/history/kline',
+      qs,
+      headers:
+        {
+          'Cache-Control': 'no-cache'
+        },
+      json: true
+    };
+
+    try {
+      const data = await request(options);
+      let result = [];
+
+      for (let i=0; i<data.data.length; i++) {
+        const item = data.data[i];
+
+        result.push([
+          data.ts,
+          item['open'].toString(),
+          item['high'].toString(),
+          item['low'].toString(),
+          item['close'].toString(),
+          item['vol'].toString(),
+          data.ts,
+          item['amount'].toString(),
+          item['count'],
+          '',
+          '',
+          '',
+        ]);
+      }
+
+      return result;
+    } catch (e) {
+      next(e);
+    }
+  },
+
+  allowInterval: (interval) => {
+    const intervalList = [
+      '1m',
+      '3m',
+      '5m',
+      '15m',
+      '30m',
+      '1h',
+      '2h',
+      '4h',
+      '6h',
+      '8h',
+      '12h',
+      '1d',
+      '3d',
+      '1w',
+      '1M',
+    ];
+
+    return intervalList.indexOf(interval) !== -1;
+  }
+
 };
 
 module.exports = obj;
