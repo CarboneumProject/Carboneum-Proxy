@@ -20,6 +20,7 @@ const accountRouter = require('./routes/account');
 const getvalRouter = require('./routes/getval');
 const tickerRouter = require('./routes/ticker');
 const symbolRouter = require('./routes/symbol');
+const klinesRouter = require('./routes/klines');
 
 const app = express();
 
@@ -33,7 +34,7 @@ app.use(session({
   secret: 'e53fff9376c3fcee6c2009efaf5c06d1',
   resave: false,
   saveUninitialized: true,
-  cookie: {secure: false}
+  cookie: {secure: process.env.NODE_ENV === 'production'}
 }));
 
 //path//
@@ -46,6 +47,7 @@ app.use('/allOrders', allOrderRouter);
 app.use('/account', accountRouter);
 app.use('/getval', getvalRouter);
 app.use('/ticker', tickerRouter);
+app.use('/klines', klinesRouter);
 app.post('/sign-in', function (req, res) {
   const addressFromSign = validateSignature(req.body.signed);
   // noinspection JSUnresolvedFunction
