@@ -10,13 +10,13 @@ router.get('/', async (req, res, next) => {
 
   if (exchange[req.query.exchange] && exchange[req.query.exchange].hasOwnProperty('klines')) {
     if (symbol['carboneum'].hasOwnProperty(req.query.symbol) && symbol['carboneum'][req.query.symbol].hasOwnProperty(req.query.exchange)) {
-      const interval = req.query.interval;
       const symbolName = symbol['carboneum'][req.query.symbol][req.query.exchange];
       const startTime = req.query.startTime;
       const endTime = req.query.endTime;
       const limit = req.query.limit;
+      const interval = exchange[req.query.exchange].allowInterval(req.query.interval);
 
-      if (exchange[req.query.exchange].allowInterval(interval)) {
+      if (interval !== false) {
         const ticker = await exchange[req.query.exchange].klines(
           symbolName,
           interval,

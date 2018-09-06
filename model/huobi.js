@@ -468,7 +468,7 @@ let obj = {
   klines: async (symbolName, interval, startTime, endTime, limit, next) => {
     let qs = {
       symbol: symbolName,
-      period: interval.replace('m', 'min'),
+      period: interval,
       size: limit,
     };
 
@@ -523,23 +523,34 @@ let obj = {
   allowInterval: (interval) => {
     const intervalList = [
       '1m',
-      '3m',
       '5m',
       '15m',
       '30m',
       '1h',
-      '2h',
-      '4h',
-      '6h',
-      '8h',
-      '12h',
       '1d',
-      '3d',
       '1w',
       '1M',
+      '1Y',
     ];
 
-    return intervalList.indexOf(interval) !== -1;
+    if (intervalList.indexOf(interval) !== -1) {
+      switch (interval) {
+        case '1h':
+          return '60min';
+        case '1d':
+          return '1day';
+        case '1w':
+          return '1week';
+        case '1M':
+          return '1mon';
+        case '1Y':
+          return '1year';
+        default:
+          return interval.replace('m', 'min');
+      }
+    }
+
+    return false;
   }
 
 };

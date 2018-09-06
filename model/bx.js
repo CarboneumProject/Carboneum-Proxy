@@ -354,6 +354,97 @@ let obj = {
     } catch (e) {
       next(e);
     }
+  },
+
+  klines: async (symbolName, interval, startTime, endTime, limit, next) => {
+    const now = (new Date()).getTime();
+    let qs = {
+      pairing: symbolName,
+      int: interval,
+      limit,
+      callback: `jQuery172024573196238143047_${now}`,
+      _: now,
+    };
+
+    for (let q in qs) {
+      if (qs.hasOwnProperty(q)) {
+        if (qs[q] === undefined) {
+          delete qs[q]
+        }
+      }
+    }
+
+    const options = {
+      method: 'GET',
+      url: 'https://bx.in.th/api/chart/price/',
+      qs,
+      headers:
+        {
+          'Cache-Control': 'no-cache'
+        },
+      json: true
+    };
+
+    try {
+      const data = await request(options);
+      let result = [];
+
+      for (let i=0; i<data.length; i++) {
+        const item = data[i];
+
+        result.push([
+          data[0],
+          item[5].toString(),
+          item[2].toString(),
+          item[1].toString(),
+          item[6].toString(),
+          item[4].toString(),
+          data.ts,
+          item[4] * item[3],
+          item[4] / item[3],
+          '',
+          '',
+          '',
+        ]);
+      }
+
+      return result;
+    } catch (e) {
+      next(e);
+    }
+  },
+
+  allowInterval: (interval) => {
+    const intervalList = [
+      '1m',
+      '5m',
+      '15m',
+      '30m',
+      '1h',
+      '1d',
+      '1w',
+      '1M',
+      '1Y',
+    ];
+
+    if (intervalList.indexOf(interval) !== -1) {
+      switch (interval) {
+        case '1h':
+          return '60min';
+        case '1d':
+          return '5';
+        case '1w':
+          return '60';
+        case '1M':
+          return '180';
+        case '1Y':
+          return '720';
+        default:
+          return interval.replace('m', 'min');
+      }
+    }
+
+    return false;
   }
 
 };
