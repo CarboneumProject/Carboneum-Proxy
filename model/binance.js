@@ -148,8 +148,6 @@ let obj = {
       json: true
     };
 
-    console.log(form);
-
     request(options, function (error, response, body) {
       if (error) {
         //todo handle this error
@@ -458,7 +456,11 @@ let obj = {
       '1M',
     ];
 
-    return intervalList.indexOf(interval) !== -1;
+    if (intervalList.indexOf(interval) !== -1) {
+      return interval;
+    }
+
+    return false;
   }
 
 };

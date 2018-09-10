@@ -357,12 +357,32 @@ let obj = {
   },
 
   klines: async (symbolName, interval, startTime, endTime, limit, next) => {
+    if (limit !== undefined || limit != null) {
+      next(new ExchangeError('Exchange not support limit parameter', 1000));
+      return;
+    }
+
     const now = (new Date()).getTime();
+
+    switch (interval) {
+      case '5':
+        limit = '1';
+        break;
+      case '60':
+        limit = '5';
+        break;
+      case '360':
+        limit = '90';
+        break;
+    }
+
+    const callback = `jQuery172024573196238143047_${now}`;
+
     let qs = {
       pairing: symbolName,
       int: interval,
       limit,
-      callback: `jQuery172024573196238143047_${now}`,
+      callback,
       _: now,
     };
 
@@ -382,25 +402,25 @@ let obj = {
         {
           'Cache-Control': 'no-cache'
         },
-      json: true
     };
 
     try {
-      const data = await request(options);
+      const res = await request(options);
       let result = [];
+      const data = JSON.parse(res.replace(new RegExp(`^/\\*\\*/${callback}\\(|\\)\\;`, "g"), ''));
 
       for (let i=0; i<data.length; i++) {
         const item = data[i];
 
         result.push([
-          data[0],
+          item[0],
           item[5].toString(),
           item[2].toString(),
           item[1].toString(),
           item[6].toString(),
           item[4].toString(),
-          data.ts,
-          item[4] * item[3],
+          item[0],
+          (item[4] * item[3]).toString(),
           item[4] / item[3],
           '',
           '',
@@ -416,31 +436,21 @@ let obj = {
 
   allowInterval: (interval) => {
     const intervalList = [
-      '1m',
       '5m',
-      '15m',
-      '30m',
       '1h',
       '1d',
-      '1w',
-      '1M',
-      '1Y',
     ];
 
     if (intervalList.indexOf(interval) !== -1) {
       switch (interval) {
+        case '5m':
+          return '5'; // 1
         case '1h':
-          return '60min';
+          return '60'; // 5
         case '1d':
-          return '5';
-        case '1w':
-          return '60';
-        case '1M':
-          return '180';
-        case '1Y':
-          return '720';
+          return '360'; // 90
         default:
-          return interval.replace('m', 'min');
+          return false;
       }
     }
 

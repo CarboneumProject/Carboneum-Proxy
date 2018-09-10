@@ -29,8 +29,6 @@ function genSignature(method, host_url, path, form, nonce, secret_key, api_key) 
       if (form.hasOwnProperty(key)) {
         if (key !== 'Timestamp' && key !== 'Signature' && key !== 'AccessKeyId') {
           queryString.push(key + '=' + form[key]);
-          console.log(key);
-          console.log(form[key]);
         }
       }
     }
@@ -43,9 +41,7 @@ function genSignature(method, host_url, path, form, nonce, secret_key, api_key) 
   let payload = [method, host_url, path, queryString];
 
   payload = payload.join('\n');
-  console.log(payload);
 
-  console.log(queryString);
   return CryptoJS.HmacSHA256(payload, secret_key).toString(CryptoJS.enc.Base64);
 }
 

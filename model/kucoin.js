@@ -42,10 +42,6 @@ function genSignature(form, path, nonce, secret_key) {
   let strForSign = path + '/' + nonce + '/' + queryString;
   let signatureStr = new Buffer(strForSign).toString('base64');
 
-  console.log(strForSign);
-  console.log(signatureStr);
-
-  console.log(queryString);
   return CryptoJS.HmacSHA256(signatureStr, secret_key).toString(CryptoJS.enc.Hex);
 }
 
@@ -516,12 +512,16 @@ let obj = {
   },
 
   klines: async (symbolName, interval, startTime, endTime, limit, next) => {
+    if (limit !== undefined || limit != null) {
+      next(new ExchangeError('Exchange not support limit parameter', 1000));
+      return;
+    }
+
     let qs = {
       symbol: symbolName,
-      type: interval.replace('m', 'min'),
-      from: startTime,
-      endTime: endTime,
-      limit,
+      resolution: interval,
+      from: Math.trunc(startTime / 1000),
+      to: Math.trunc(endTime / 1000),
     };
 
     for (let q in qs) {
@@ -534,7 +534,7 @@ let obj = {
 
     const options = {
       method: 'GET',
-      url: 'https://api.kucoin.com/v1/open/kline',
+      url: 'https://api.kucoin.com/v1/open/chart/history',
       qs,
       headers:
         {
@@ -545,21 +545,20 @@ let obj = {
 
     try {
       const data = await request(options);
+
       let result = [];
 
-      for (let i=0; i<data.data.length; i++) {
-        const item = data.data[i];
-
+      for (let i=0; i<data.c.length; i++) {
         result.push([
-          data.ts,
-          item['open'].toString(),
-          item['high'].toString(),
-          item['low'].toString(),
-          item['close'].toString(),
-          item['vol'].toString(),
-          data.ts,
-          item['amount'].toString(),
-          item['count'],
+          data.t[i],
+          data.o[i].toString(),
+          data.h[i].toString(),
+          data.l[i].toString(),
+          data.c[i].toString(),
+          data.v[i].toString(),
+          data.t[i],
+          '',
+          0,
           '',
           '',
           '',
@@ -575,23 +574,31 @@ let obj = {
   allowInterval: (interval) => {
     const intervalList = [
       '1m',
-      '3m',
       '5m',
       '15m',
       '30m',
       '1h',
-      '2h',
-      '4h',
-      '6h',
       '8h',
-      '12h',
       '1d',
-      '3d',
       '1w',
-      '1M',
     ];
 
-    return intervalList.indexOf(interval) !== -1;
+    if (intervalList.indexOf(interval) !== -1) {
+      switch (interval) {
+        case '1d':
+          return 'D';
+        case '1w':
+          return 'W';
+        case '1h':
+          return '60';
+        case '8h':
+          return '480';
+        default:
+          return interval.replace('m', '');
+      }
+    }
+
+    return false;
   }
 };
 
