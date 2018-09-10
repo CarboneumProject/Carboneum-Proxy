@@ -354,6 +354,107 @@ let obj = {
     } catch (e) {
       next(e);
     }
+  },
+
+  klines: async (symbolName, interval, startTime, endTime, limit, next) => {
+    if (limit !== undefined || limit != null) {
+      next(new ExchangeError('Exchange not support limit parameter', 1000));
+      return;
+    }
+
+    const now = (new Date()).getTime();
+
+    switch (interval) {
+      case '5':
+        limit = '1';
+        break;
+      case '60':
+        limit = '5';
+        break;
+      case '360':
+        limit = '90';
+        break;
+    }
+
+    const callback = `jQuery172024573196238143047_${now}`;
+
+    let qs = {
+      pairing: symbolName,
+      int: interval,
+      limit,
+      callback,
+      _: now,
+    };
+
+    for (let q in qs) {
+      if (qs.hasOwnProperty(q)) {
+        if (qs[q] === undefined) {
+          delete qs[q]
+        }
+      }
+    }
+
+    const options = {
+      method: 'GET',
+      url: 'https://bx.in.th/api/chart/price/',
+      qs,
+      headers:
+        {
+          'Cache-Control': 'no-cache'
+        },
+    };
+
+    try {
+      const res = await request(options);
+      let result = [];
+      const data = JSON.parse(res.replace(new RegExp(`^/\\*\\*/${callback}\\(|\\)\\;`, "g"), ''));
+
+      for (let i=0; i<data.length; i++) {
+        const item = data[i];
+
+        result.push([
+          item[0],
+          item[5].toString(),
+          item[2].toString(),
+          item[1].toString(),
+          item[6].toString(),
+          item[4].toString(),
+          item[0],
+          (item[4] * item[3]).toString(),
+          item[4] / item[3],
+          '',
+          '',
+          '',
+        ]);
+      }
+
+      return result;
+    } catch (e) {
+      next(e);
+    }
+  },
+
+  allowInterval: (interval) => {
+    const intervalList = [
+      '5m',
+      '1h',
+      '1d',
+    ];
+
+    if (intervalList.indexOf(interval) !== -1) {
+      switch (interval) {
+        case '5m':
+          return '5'; // 1
+        case '1h':
+          return '60'; // 5
+        case '1d':
+          return '360'; // 90
+        default:
+          return false;
+      }
+    }
+
+    return false;
   }
 
 };

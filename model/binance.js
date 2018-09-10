@@ -148,8 +148,6 @@ let obj = {
       json: true
     };
 
-    console.log(form);
-
     request(options, function (error, response, body) {
       if (error) {
         //todo handle this error
@@ -402,6 +400,67 @@ let obj = {
     } catch (e) {
       next(e);
     }
+  },
+
+  klines: async (symbolName, interval, startTime, endTime, limit, next) => {
+    let qs = {
+      symbol: symbolName,
+      interval,
+      startTime,
+      endTime,
+      limit,
+    };
+
+    for (let q in qs) {
+      if (qs.hasOwnProperty(q)) {
+        if (qs[q] === undefined) {
+          delete qs[q]
+        }
+      }
+    }
+
+    const options = {
+      method: 'GET',
+      url: 'https://api.binance.com/api/v1/klines',
+      qs,
+      headers:
+        {
+          'Cache-Control': 'no-cache'
+        },
+      json: true
+    };
+
+    try {
+      return await request(options);
+    } catch (e) {
+      next(e);
+    }
+  },
+
+  allowInterval: (interval) => {
+    const intervalList = [
+      '1m',
+      '3m',
+      '5m',
+      '15m',
+      '30m',
+      '1h',
+      '2h',
+      '4h',
+      '6h',
+      '8h',
+      '12h',
+      '1d',
+      '3d',
+      '1w',
+      '1M',
+    ];
+
+    if (intervalList.indexOf(interval) !== -1) {
+      return interval;
+    }
+
+    return false;
   }
 
 };

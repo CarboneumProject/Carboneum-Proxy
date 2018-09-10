@@ -29,8 +29,6 @@ function genSignature(method, host_url, path, form, nonce, secret_key, api_key) 
       if (form.hasOwnProperty(key)) {
         if (key !== 'Timestamp' && key !== 'Signature' && key !== 'AccessKeyId') {
           queryString.push(key + '=' + form[key]);
-          console.log(key);
-          console.log(form[key]);
         }
       }
     }
@@ -43,9 +41,7 @@ function genSignature(method, host_url, path, form, nonce, secret_key, api_key) 
   let payload = [method, host_url, path, queryString];
 
   payload = payload.join('\n');
-  console.log(payload);
 
-  console.log(queryString);
   return CryptoJS.HmacSHA256(payload, secret_key).toString(CryptoJS.enc.Base64);
 }
 
@@ -464,6 +460,94 @@ let obj = {
       next(e);
     }
   },
+
+  klines: async (symbolName, interval, startTime, endTime, limit, next) => {
+    let qs = {
+      symbol: symbolName,
+      period: interval,
+      size: limit,
+    };
+
+    for (let q in qs) {
+      if (qs.hasOwnProperty(q)) {
+        if (qs[q] === undefined) {
+          delete qs[q]
+        }
+      }
+    }
+
+    const options = {
+      method: 'GET',
+      url: 'https://api.huobi.pro/market/history/kline',
+      qs,
+      headers:
+        {
+          'Cache-Control': 'no-cache'
+        },
+      json: true
+    };
+
+    try {
+      const data = await request(options);
+      let result = [];
+
+      for (let i=0; i<data.data.length; i++) {
+        const item = data.data[i];
+
+        result.push([
+          data.ts,
+          item['open'].toString(),
+          item['high'].toString(),
+          item['low'].toString(),
+          item['close'].toString(),
+          item['vol'].toString(),
+          data.ts,
+          item['amount'].toString(),
+          item['count'],
+          '',
+          '',
+          '',
+        ]);
+      }
+
+      return result;
+    } catch (e) {
+      next(e);
+    }
+  },
+
+  allowInterval: (interval) => {
+    const intervalList = [
+      '1m',
+      '5m',
+      '15m',
+      '30m',
+      '1h',
+      '1d',
+      '1w',
+      '1M',
+      '1Y',
+    ];
+
+    if (intervalList.indexOf(interval) !== -1) {
+      switch (interval) {
+        case '1h':
+          return '60min';
+        case '1d':
+          return '1day';
+        case '1w':
+          return '1week';
+        case '1M':
+          return '1mon';
+        case '1Y':
+          return '1year';
+        default:
+          return interval.replace('m', 'min');
+      }
+    }
+
+    return false;
+  }
 
 };
 

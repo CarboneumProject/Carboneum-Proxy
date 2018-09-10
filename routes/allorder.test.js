@@ -18,6 +18,8 @@ beforeAll(async (done) => {
     })
     .expect(200);
 
+  cookie = res.headers['set-cookie'];
+
   await request(app)
     .post('/getval/')
     .query({exchange: 'binance'})
@@ -59,72 +61,71 @@ beforeAll(async (done) => {
   done();
 });
 
-test('binance allOrders', function (done) {
+test('binance allOrders', async function (done) {
   const symbol = 'ETH/BTC';
 
-  request(app)
+  const res = await request(app)
     .get('/allOrders/')
     .query({exchange: 'binance', symbol: symbol, timestamp: Math.round(new Date().getTime() / 1000)})
     .set('Accept', 'application/json')
     .set('cookie', cookie)
-    .expect(200)
-    .then(response => {
-      expect(response.statusCode).toBe(200);
-      expect(Array.isArray(response.body)).toBe(true);
-      const allOrders = response.body;
+    .expect(200);
 
-      for (let i = 0; i < allOrders.length; i++) {
-        expect(allOrders[i]).toHaveProperty('symbol');
-        expect(typeof allOrders[i].symbol).toBe('string');
-        // noinspection SpellCheckingInspection
-        expect(allOrders[i].symbol).toBe(symbol);
+  const allOrders = res.body;
+  expect(Array.isArray(allOrders)).toBe(true);
 
-        expect(allOrders[i]).toHaveProperty('orderId');
-        expect(typeof allOrders[i].orderId).toBe('string');
+  for (let i = 0; i < allOrders.length; i++) {
+    expect(allOrders[i]).toHaveProperty('symbol');
+    expect(typeof allOrders[i].symbol).toBe('string');
+    // noinspection SpellCheckingInspection
+    expect(allOrders[i].symbol).toBe(symbol);
 
-        expect(allOrders[i]).toHaveProperty('clientOrderId');
-        expect(typeof allOrders[i].clientOrderId).toBe('string');
+    expect(allOrders[i]).toHaveProperty('orderId');
+    expect(typeof allOrders[i].orderId).toBe('string');
 
-        expect(allOrders[i]).toHaveProperty('price');
-        expect(typeof allOrders[i].price).toBe('string');
-        expect(typeof parseFloat(allOrders[i].price)).toBe('number');
+    expect(allOrders[i]).toHaveProperty('clientOrderId');
+    expect(typeof allOrders[i].clientOrderId).toBe('string');
 
-        expect(allOrders[i]).toHaveProperty('origQty');
-        expect(typeof allOrders[i].origQty).toBe('string');
-        expect(typeof parseFloat(allOrders[i].origQty)).toBe('number');
+    expect(allOrders[i]).toHaveProperty('price');
+    expect(typeof allOrders[i].price).toBe('string');
+    expect(typeof parseFloat(allOrders[i].price)).toBe('number');
 
-        expect(allOrders[i]).toHaveProperty('executedQty');
-        expect(typeof allOrders[i].executedQty).toBe('string');
-        expect(typeof parseFloat(allOrders[i].executedQty)).toBe('number');
+    expect(allOrders[i]).toHaveProperty('origQty');
+    expect(typeof allOrders[i].origQty).toBe('string');
+    expect(typeof parseFloat(allOrders[i].origQty)).toBe('number');
 
-        expect(allOrders[i]).toHaveProperty('status');
-        expect(typeof allOrders[i].status).toBe('string');
+    expect(allOrders[i]).toHaveProperty('executedQty');
+    expect(typeof allOrders[i].executedQty).toBe('string');
+    expect(typeof parseFloat(allOrders[i].executedQty)).toBe('number');
 
-        expect(allOrders[i]).toHaveProperty('timeInForce');
-        expect(typeof allOrders[i].timeInForce).toBe('string');
+    expect(allOrders[i]).toHaveProperty('status');
+    expect(typeof allOrders[i].status).toBe('string');
 
-        expect(allOrders[i]).toHaveProperty('type');
-        expect(typeof allOrders[i].type).toBe('string');
+    expect(allOrders[i]).toHaveProperty('timeInForce');
+    expect(typeof allOrders[i].timeInForce).toBe('string');
 
-        expect(allOrders[i]).toHaveProperty('side');
-        expect(typeof allOrders[i].side).toBe('string');
+    expect(allOrders[i]).toHaveProperty('type');
+    expect(typeof allOrders[i].type).toBe('string');
 
-        expect(allOrders[i]).toHaveProperty('stopPrice');
-        expect(typeof allOrders[i].stopPrice).toBe('string');
-        expect(typeof parseFloat(allOrders[i].stopPrice)).toBe('number');
+    expect(allOrders[i]).toHaveProperty('side');
+    expect(typeof allOrders[i].side).toBe('string');
 
-        expect(allOrders[i]).toHaveProperty('icebergQty');
-        expect(typeof allOrders[i].icebergQty).toBe('string');
-        expect(typeof parseFloat(allOrders[i].icebergQty)).toBe('number');
+    expect(allOrders[i]).toHaveProperty('stopPrice');
+    expect(typeof allOrders[i].stopPrice).toBe('string');
+    expect(typeof parseFloat(allOrders[i].stopPrice)).toBe('number');
 
-        expect(allOrders[i]).toHaveProperty('time');
-        expect(typeof allOrders[i].time).toBe('number');
+    expect(allOrders[i]).toHaveProperty('icebergQty');
+    expect(typeof allOrders[i].icebergQty).toBe('string');
+    expect(typeof parseFloat(allOrders[i].icebergQty)).toBe('number');
 
-        expect(allOrders[i]).toHaveProperty('isWorking');
-        expect(typeof allOrders[i].isWorking).toBe('boolean');
-      }
-      done();
-    })
+    expect(allOrders[i]).toHaveProperty('time');
+    expect(typeof allOrders[i].time).toBe('number');
+
+    expect(allOrders[i]).toHaveProperty('isWorking');
+    expect(typeof allOrders[i].isWorking).toBe('boolean');
+  }
+  done();
+
 });
 
 

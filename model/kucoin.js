@@ -42,10 +42,6 @@ function genSignature(form, path, nonce, secret_key) {
   let strForSign = path + '/' + nonce + '/' + queryString;
   let signatureStr = new Buffer(strForSign).toString('base64');
 
-  console.log(strForSign);
-  console.log(signatureStr);
-
-  console.log(queryString);
   return CryptoJS.HmacSHA256(signatureStr, secret_key).toString(CryptoJS.enc.Hex);
 }
 
@@ -513,6 +509,96 @@ let obj = {
     } catch (e) {
       return next(e);
     }
+  },
+
+  klines: async (symbolName, interval, startTime, endTime, limit, next) => {
+    if (limit !== undefined || limit != null) {
+      next(new ExchangeError('Exchange not support limit parameter', 1000));
+      return;
+    }
+
+    let qs = {
+      symbol: symbolName,
+      resolution: interval,
+      from: Math.trunc(startTime / 1000),
+      to: Math.trunc(endTime / 1000),
+    };
+
+    for (let q in qs) {
+      if (qs.hasOwnProperty(q)) {
+        if (qs[q] === undefined) {
+          delete qs[q]
+        }
+      }
+    }
+
+    const options = {
+      method: 'GET',
+      url: 'https://api.kucoin.com/v1/open/chart/history',
+      qs,
+      headers:
+        {
+          'Cache-Control': 'no-cache'
+        },
+      json: true
+    };
+
+    try {
+      const data = await request(options);
+
+      let result = [];
+
+      for (let i=0; i<data.c.length; i++) {
+        result.push([
+          data.t[i],
+          data.o[i].toString(),
+          data.h[i].toString(),
+          data.l[i].toString(),
+          data.c[i].toString(),
+          data.v[i].toString(),
+          data.t[i],
+          '',
+          0,
+          '',
+          '',
+          '',
+        ]);
+      }
+
+      return result;
+    } catch (e) {
+      next(e);
+    }
+  },
+
+  allowInterval: (interval) => {
+    const intervalList = [
+      '1m',
+      '5m',
+      '15m',
+      '30m',
+      '1h',
+      '8h',
+      '1d',
+      '1w',
+    ];
+
+    if (intervalList.indexOf(interval) !== -1) {
+      switch (interval) {
+        case '1d':
+          return 'D';
+        case '1w':
+          return 'W';
+        case '1h':
+          return '60';
+        case '8h':
+          return '480';
+        default:
+          return interval.replace('m', '');
+      }
+    }
+
+    return false;
   }
 };
 
