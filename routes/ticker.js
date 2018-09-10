@@ -5,6 +5,8 @@ const router = express.Router();
 const exchange = require('../model/exchange');
 const ExchangeError = require("../model/exchangeError");
 
+Decimal.set({toExpPos: 9e15, toExpNeg: -9e15});
+
 router.get('/', async function (req, res, next) {
   const symbol = await require('../model/symbol');
 
