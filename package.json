@@ -7,7 +7,12 @@
     "deploy": "gcloud app deploy",
     "test": "jest"
   },
+  "engines": {
+    "node": "8.x",
+    "npm": "6.x"
+  },
   "dependencies": {
+    "@google-cloud/debug-agent": "^2.6.0",
     "@google-cloud/trace-agent": "^3.1.1",
     "babel-core": "^6.26.3",
     "cookie-parser": "~1.4.3",

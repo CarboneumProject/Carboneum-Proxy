@@ -1,5 +1,6 @@
 if (process.env.NODE_ENV === 'production') {
   require('@google-cloud/trace-agent').start();
+  require('@google-cloud/debug-agent').start();
 }
 
 const express = require('express');

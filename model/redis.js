@@ -1,6 +1,12 @@
 const {promisify} = require('util');
 
-const redis = require('redis').createClient(6379, process.env.NODE_ENV === 'production'? '10.148.0.20': '127.0.0.1');
+const redis = require('redis').createClient(
+  process.env.REDISPORT || '6379',
+  process.env.REDISHOST || '127.0.0.1',
+  {
+    'auth_pass': process.env.REDISKEY,
+  }
+);
 redis.getAsync = promisify(redis.get).bind(redis);
 redis.setAsync = promisify(redis.set).bind(redis);
 module.exports = redis;
