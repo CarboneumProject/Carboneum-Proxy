@@ -8,5 +8,7 @@ const redis = require('redis').createClient(
   }
 );
 redis.getAsync = promisify(redis.get).bind(redis);
+redis.hgetAsync = promisify(redis.hget).bind(redis);
+redis.hmgetAsync = promisify(redis.hmget).bind(redis);
 redis.setAsync = promisify(redis.set).bind(redis);
 module.exports = redis;
