@@ -1,5 +1,6 @@
 if (process.env.NODE_ENV === 'production') {
   require('@google-cloud/trace-agent').start();
+  require('@google-cloud/debug-agent').start();
 }
 
 const express = require('express');
@@ -8,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const validateSignature = require('./model/validate-signature');
 const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -29,8 +31,15 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-// app.set('trust proxy', 1); // trust first proxy
+app.set('trust proxy', 1); // trust first proxy
+
 app.use(session({
+  store: new RedisStore({
+    host: process.env.REDISHOST || '127.0.0.1',
+    port: process.env.REDISPORT || '6379',
+    db: 2,
+    pass: process.env.REDISKEY
+  }),
   secret: 'e53fff9376c3fcee6c2009efaf5c06d1',
   resave: false,
   saveUninitialized: true,
@@ -48,6 +57,7 @@ app.use('/account', accountRouter);
 app.use('/getval', getvalRouter);
 app.use('/ticker', tickerRouter);
 app.use('/klines', klinesRouter);
+app.use('/update', updateRouter);
 app.post('/sign-in', function (req, res) {
   const addressFromSign = validateSignature(req.body.signed);
   // noinspection JSUnresolvedFunction
